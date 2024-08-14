@@ -1,4 +1,4 @@
-local KEY = "98821636884"
+local KEY = ${{ secrets.SCRIPT_KEY_9142024_03112005 }}
 
 
 if not game:IsLoaded() then
