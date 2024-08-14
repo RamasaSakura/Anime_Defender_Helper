@@ -121,7 +121,7 @@ task.spawn(function()
 	end
 end)
 
-getgenv().key = '98821636884'
+getgenv().key = KEY
 getgenv().Configuration = {
 	['Enabled'] = true,
 	['Enabled Challenge'] = false,
