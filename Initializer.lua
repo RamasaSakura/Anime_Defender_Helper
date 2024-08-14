@@ -109,11 +109,11 @@ end
 task.spawn(function()
 
 	local topbar = plr.PlayerGui:WaitForChild('TopBar',5)
-	
+
 	if not topbar then
 		while task.wait(3) do
 			Teleport()
-			
+
 			if plr.PlayerGui:FindFirstChild("TopBar") then
 				break
 			end
@@ -147,3 +147,5 @@ getgenv().Configuration = {
 	},
 	['Placement Distance'] = 9,
 };
+
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))()
