@@ -1,4 +1,4 @@
-local KEY = ${{ secrets.SCRIPT_KEY_9142024_03112005 }}
+local KEY = "98821636884"
 
 
 if not game:IsLoaded() then
@@ -107,10 +107,11 @@ end
 
 
 task.spawn(function()
+
 	local topbar = plr.PlayerGui:WaitForChild('TopBar',5)
 
 	if not topbar then
-		while task.wait(10) do
+		while task.wait(3) do
 			Teleport()
 
 			if plr.PlayerGui:FindFirstChild("TopBar") then
@@ -147,4 +148,5 @@ getgenv().Configuration = {
 	['Placement Distance'] = 9,
 };
 
+warn(KEY)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))()
