@@ -145,5 +145,3 @@ getgenv().Configuration = {
 	},
 	['Placement Distance'] = 9,
 };
-
-loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))()
