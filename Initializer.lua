@@ -1,3 +1,5 @@
+local KEY = "98821636884"
+
 
 if not game:IsLoaded() then
 	game.Loaded:Wait()
