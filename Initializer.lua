@@ -107,11 +107,10 @@ end
 
 
 task.spawn(function()
-
 	local topbar = plr.PlayerGui:WaitForChild('TopBar',5)
 
 	if not topbar then
-		while task.wait(3) do
+		while task.wait(10) do
 			Teleport()
 
 			if plr.PlayerGui:FindFirstChild("TopBar") then
