@@ -8,7 +8,9 @@ local plr = game:GetService("Players").LocalPlayer
 local function MakeItClear(v: Instance?)
 	if v:IsA("BasePart") or v:IsA("Decal") or v:IsA("Texture") then
 		v.Transparency = 1
-
+		if v:IsA("BasePart") then
+		v.Anchored = true
+		end
 	elseif v:IsA("Beam") or v:IsA("ParticleEmitter") or v:IsA('BillboardGui') then
 		v.Enabled = false
 
