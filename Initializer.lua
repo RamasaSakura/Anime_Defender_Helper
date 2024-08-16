@@ -126,8 +126,8 @@ getgenv().Configuration = {
 	['Enabled'] = true,
 	['Enabled Challenge'] = false,
 	['PC Name'] = 'dekonemillionbaht',
-	['Delay'] = 0,
-	['Leave Delay'] = 0,
+	['Delay'] = 20,
+	['Leave Delay'] = 5,
 	['EquipBest'] = true,
 	['Leave At Wave'] = 31,
 	['Leave Method'] = 2, -- 1 = Sell,  2 = Leave
