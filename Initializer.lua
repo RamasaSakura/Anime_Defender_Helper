@@ -1,5 +1,7 @@
 local KEY = "98821636884"
 
+local plr = game:GetService("Players").LocalPlayer
+
 if not plr.Character then
 	plr.CharacterAdded:Wait()
 end
