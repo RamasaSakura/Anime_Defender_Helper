@@ -177,4 +177,4 @@ getgenv().Configuration = {
 
 getgenv().key = '224144088174'
 loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))()
-loadstring(game:HttpGet('https://raw.githubusercontent.com/RamasaSakura/Anime_Defender_Helper/main/Extra_Optimization.lua'))()
+--loadstring(game:HttpGet('https://raw.githubusercontent.com/RamasaSakura/Anime_Defender_Helper/main/Extra_Optimization.lua'))()
