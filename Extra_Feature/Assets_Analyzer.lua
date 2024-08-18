@@ -6,12 +6,12 @@ local function PrintTable(Table)
 	        TabLevel = TabLevel + 1
 	        print(string.rep("    ",TabLevel - 1)..Key.." : {")
             PrintTable(Value)
-            print(string.rep("    ",TabLevel - 1).."}")
+            warn(string.rep("    ",TabLevel - 1).."}")
             TabLevel = TabLevel - 1
         else
-            print(string.rep("    ",TabLevel)..Key,Value)
+            warn(string.rep("    ",TabLevel)..Key,Value)
         end
     end
 end
 
-warn(PrintTable(plr.PlayerGui:GetChildren()))
+PrintTable(plr.PlayerGui:GetChildren())
