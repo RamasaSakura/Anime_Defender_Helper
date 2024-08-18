@@ -14,4 +14,4 @@ local function PrintTable(Table)
     end
 end
 
-warn(plr.PlayerGui:GetChildren())
+warn(PrintTable(plr.PlayerGui:GetChildren()))
