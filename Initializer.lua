@@ -123,7 +123,7 @@ getgenv().Configuration = {
 	},
 	['Placement Distance'] = 9,
 	
-	["Farm Tower Of Eternity Mode"] = true
+	["Farm Tower Of Eternity Mode"] = true --ฟาร์มหอคอย true คือใช่ false คือไม่
 };
 
 local function IsInLobbyGame()
@@ -140,5 +140,3 @@ else
 	})
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))(KEY)
 end
-
-print(game.GameId)
