@@ -126,9 +126,19 @@ getgenv().Configuration = {
 	["Farm Tower Of Eternity Mode"] = true
 };
 
-if getgenv().Configuration["Farm Tower Of Eternity Mode"] and game.GameId == Lobby_Id then
+local function IsInLobbyGame()
+	return game.GameId == 17017769292 or game.GameId == 5836869368
+end
+
+if getgenv().Configuration["Farm Tower Of Eternity Mode"] and IsInLobbyGame() then
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/RamasaSakura/Anime_Defender_Helper/main/Helpers/AD_Auto_Tower.lua'))(KEY)
 else
+	game:GetService("StarterGui"):SetCore("SendNotification", {
+		Text = 'เปลี่ยนโหมดฟาร์ม';
+		Title = "กำลังฟาร์ม ไก่ตัน";
+		Duration = 5
+	})
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))(KEY)
 end
 
+print(game.GameId)
