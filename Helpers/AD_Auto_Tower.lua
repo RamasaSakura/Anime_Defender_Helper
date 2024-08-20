@@ -134,6 +134,6 @@ followPath(TowerLandingPoint.Position)
 
 StartGui:SetCore("SendNotification", {
 	Title = 'เปลี่ยนโหมดฟาร์ม';
-	Text = "กำลังฟาร์มทาวเวอร์";
+	Text = "กำลังฟาร์ม หอคอย";
 	Duration = 3
 })
