@@ -26,7 +26,9 @@ local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
-local path = PathfindingService:CreatePath()
+local path = PathfindingService:CreatePath({
+	WaypointSpacing = 6
+})
 
 local character = plr.Character
 local humanoid = character.Humanoid
