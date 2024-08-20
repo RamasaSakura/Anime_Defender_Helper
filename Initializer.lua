@@ -123,11 +123,12 @@ getgenv().Configuration = {
 	},
 	['Placement Distance'] = 9,
 	
-	['Config'] = getgenv().Config or {}
+	["Farm Tower Of Eternity Mode"] = false
 };
 
-if getgenv().Configuration.Config["Farm Tower Of Eternity Mode"] and game.GameId == Lobby_Id then
+if getgenv().Configuration["Farm Tower Of Eternity Mode"] and game.GameId == Lobby_Id then
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/RamasaSakura/Anime_Defender_Helper/main/Helpers/AD_Auto_Tower.lua'))(KEY)
 else
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))(KEY)
 end
+
