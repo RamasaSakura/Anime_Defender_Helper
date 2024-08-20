@@ -1,5 +1,5 @@
 local KEY = "98821636884"
-local Lobby_Id = '17017769292'
+local Lobby_Id = 17017769292
 local plr = game:GetService("Players").LocalPlayer
 
 if not plr.Character then
@@ -123,7 +123,7 @@ getgenv().Configuration = {
 	},
 	['Placement Distance'] = 9,
 	
-	["Farm Tower Of Eternity Mode"] = false
+	["Farm Tower Of Eternity Mode"] = true
 };
 
 if getgenv().Configuration["Farm Tower Of Eternity Mode"] and game.GameId == Lobby_Id then
