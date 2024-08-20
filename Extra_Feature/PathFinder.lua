@@ -20,6 +20,12 @@ local blockedConnection
 
 local function followPath(destination)
 	-- Compute the path
+	
+	StarterGui:SetCore("SendNotification", {
+		Title = "รอสักครู่";
+		Text = "กำลังหาทางไปหาตำแหน่งผู้เล่น";
+		Duration = 3
+	})
 	local success, errorMessage = pcall(function()
 		path:ComputeAsync(character.PrimaryPart.Position, destination)
 	end)
@@ -71,4 +77,6 @@ if not Target then
 	return
 end
 
+
 followPath(Target.PrimaryPart.Position)
+
