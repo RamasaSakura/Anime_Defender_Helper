@@ -1,0 +1,1211 @@
+--[[ Reference sheet
+
+@ Comp Behavior
+
+Spread upgrade: Upgrade Prioritized unit first but will switch two second most important unit and
+switch to third most important when no more unit to switch it will switch to Proritized unit
+
+
+NOTES:
+AI will account current upgrade cost rather than initial placement cost (Outdated note...)
+
+]]
+
+
+local Config = {
+	["Node Distance From Spawner"] = 6;
+	["Minimum Distance From Node"] = 3
+};
+
+local AI_Config = {
+	["AI Preset"] = 'Rarest' :: 'Rarest' | 'Most Expensive' | 'Highest Level' | 'Slot Order' ;  --ตั้งค่า AI auto-play เว้นว่างถ้าจะปรับเอง
+	
+	['Comp Settings'] = { --Place unit based on priority (must place to that amount first before switch to lower priority)
+		Unit_Placement = {
+			[1] = 2;
+			[2] = 2;
+		};
+		
+		Upgrade_Switch_Count = {
+			[1] = 2 --Upgrade prioritized unit 2 levels before switching
+		}
+	};
+
+	
+	['Comp Behavior'] = 'Spread Upgrade' :: 'Spread Upgrade' | 'Maxed Prioritized Unit'
+	
+}
+
+
+local Preset = {
+	AI = {
+		['Most Expensive'] = { --วางตัวแพงสุดก่อน
+			Price = 100;
+			Level = 0.5;
+			Rarity = 1;
+			Slot = 0.1
+		};
+		
+		['Highest Level'] = { --วางตัวเวลสูงสุด
+			Price = 0.1;
+			Rarity = 0.1;
+			Level = 100;
+			Slot = 0.1
+		};
+		
+		['Slot Order'] = { --วางตัวตามอันดับที่ใส่มา
+			Price = 0.1;
+			Level = 0.1;
+			Rarity = 0.1;
+			Slot = 100
+		};
+		
+		['Rarest'] = { --วางตัวหายากสุดก่อน
+			Price = -50;
+			Level = -50;
+			Rarity = 200;
+			Slot = 0.1
+		};
+		
+		[''] = { --ปรับเองได้
+			Price = 1;
+			Level = 1;
+			Rarity = 1;
+			Slot = 1
+		}
+	}
+}
+
+
+local Rarity_Level_From_String = {
+	['Rare'] = 1;
+	['Epic'] = 2;
+	['Legendary'] = 3;
+	['Mystical'] = 4;
+	['Limited'] = 5;
+	['Secret'] = 6
+}
+
+local Possible_Colors = {
+	['Secret'] = {
+		Color3.new(1, 0, 0);
+		Color3.new(1, 1, 1);
+	};
+	
+	['Limited'] = {
+		Color3.new(1, 0.0666667, 1);
+		Color3.new(1, 1, 1)
+	};
+	
+	['Mystical'] = {
+		Color3.fromRGB(255,0,0);
+		Color3.fromRGB(255,255,0);
+		Color3.fromRGB(0,255,0);
+		Color3.fromRGB(0,255,255);
+		Color3.fromRGB(0,0,255);
+		Color3.fromRGB(255,0,255)
+	};
+	
+	["Legendary"] = {
+		Color3.new(1,0.584314,0);
+		Color3.new(0.988235,1,0.188235)
+	};
+	
+	['Epic'] = {
+		Color3.new(0.368627, 0.0745098, 1);
+		Color3.new(0.521569, 0.4, 1)
+	};
+	
+	['Rare'] = {
+		Color3.new(0.12549, 0.619608, 1);
+		Color3.new(0.25098, 0.537255, 1)
+	}
+}
+
+local blacklist_location = {} --Not allowed placing unit on position in this table
+
+--print(Color_Similarity(Color3.new(1, 0.501961, 0.215686),Possible_Colors.Legendary[1]))
+--print(Color_Similarity(Color3.new(1, 0.501961, 0.215686),Possible_Colors.Legendary[2]))
+
+-------------------------------------------------------------------
+
+local Paths_Folder = workspace.Paths :: Folder
+local PhysicalMap = workspace.PhysicalMap :: Folder
+local Units_Folder = workspace.Units :: Folder
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TextChatService = game:GetService("TextChatService")
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local plr = game:GetService("Players").LocalPlayer
+local GuiService = game:GetService("GuiService")
+
+
+
+
+local Random = Random.new()
+
+local Upgrade_Data = require(game:GetService("ReplicatedStorage").Modules.Bins.UnitUpgradeData) :: {[string] : {
+	Cost: number,
+	Range: number,
+	Damage: number,
+	Cooldown: number}}
+
+
+local leaderstats = plr:WaitForChild("leaderstats") :: Folder
+local yen_value = leaderstats.Yen :: NumberValue
+local Camera = workspace.CurrentCamera
+
+------GUI
+local Toolbar = game:GetService("Players").LocalPlayer.PlayerGui.HUD.Toolbar :: Frame
+local MatchResultPage = game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage :: Frame
+local UnitBar = Toolbar.UnitBar :: Frame
+local UnitHolder = UnitBar.UnitHolder :: Frame
+local Upgrade_Text = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard.MainFrame.HolderButtons.UpgradeButton.TextLabel --Value as price?
+local HolderButtons = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard.MainFrame.HolderButtons
+local Upgrade_Button = HolderButtons:WaitForChild('UpgradeButton',5) :: TextButton
+
+
+Toolbar.Visible = true
+
+local PathSplitter = Paths_Folder:GetChildren()
+
+local Selected_Path = 1 --Just leave it be should be fine outside hall of mirror
+local Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: Folder
+
+
+local Total_Nodes = #Selected_Folder:GetChildren()
+local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - (Config["Node Distance From Spawner"] or 0)))
+
+local Current_Tracking_Node = Starting_Node :: BasePart
+
+local Raycast = RaycastParams.new()
+Raycast.FilterDescendantsInstances = {PhysicalMap, Units_Folder}
+Raycast.FilterType = Enum.RaycastFilterType.Include
+
+local Placed_On_Nodes = {}
+
+type rarity = 'Rare' | 'Epic' | 'Legendary' | 'Mystical' | 'Limited' | 'Secret'
+type problems = 'queue_placement' | 'queue_upgrade'
+type ai_interest = 'Price' | 'Level' | 'Rarity' | 'Slot' --These data are static when loaded into inventory
+type askable_topic = 'yen_goal' | 'cur_upgrade_level' | 'rarity_level' | 'slot_order'
+type queue_status = 'placement' | 'upgrade'
+
+local function create_event(name)
+	local new = Instance.new("BindableEvent")
+	new.Name = name
+	return new
+end
+
+local function create_event_function(name)
+	local new = Instance.new("BindableFunction")
+	new.Name = name
+	return new
+end
+
+local Available_Units_Info = {}
+local Connections = {
+	comps = {};
+	
+	general = {};
+}
+
+local States = {
+	comps = {
+		cycle = 1
+	};
+	
+	general = {
+		last_placing_unit = nil :: string;
+		
+		last_placing_model = nil :: Model
+	}
+}
+
+local Events = {
+	comps = {
+		OnUnitPlaced = create_event("OnUnitPlaced");
+		OnUnitUpgraded = create_event('OnUnitUpgraded');
+		
+		
+		IsCompSatisfied = create_event_function("IsCompSatisfied")
+	};
+	
+	core = {
+		OnGameStarted = create_event("OnGameStarted");
+		OnUnitAddedToInventory = create_event("OnUnitAddedToInventory")
+	}
+}
+
+local Queues = {
+	
+}
+
+local Info_Ranking = {
+	Price = {};
+	Rarity = {};
+	Level = {};
+	Slot = {}
+}
+
+local ProblemsSolver = {
+	['queue_placement'] = function(option_1,option_2)
+		local default_score = 10
+		local option_score = {
+			[1] = 0;
+			[2] = 0
+		}
+		
+		local cloned_option_1 = (typeof(option_1) == 'table' and table.clone(option_1)) or nil
+		local cloned_option_2 = (typeof(option_2) == 'table' and table.clone(option_2)) or nil
+		
+		local function Ask_Interest(topic: askable_topic, asking: ai_interest)
+			option_score[1] += How_Much_Are_You_Interested_In_This(cloned_option_1[topic],asking,cloned_option_1)
+			option_score[2] += How_Much_Are_You_Interested_In_This(cloned_option_2[topic],asking,cloned_option_2)
+		end
+		
+		if cloned_option_2 and cloned_option_1 then
+			Ask_Interest('yen_goal','Price')
+			Ask_Interest('cur_upgrade_level','Level')
+			Ask_Interest('rarity_level','Rarity')
+			Ask_Interest('slot_order','Slot')
+		end
+		
+		Adjust_Queues(option_1,option_2,option_score, "queue_placement")
+		
+	end,
+	
+	['queue_upgrade'] = function(option_1,option_2, IsRecursive: boolean?)
+		local default_score = 10
+		local option_score = {
+			[1] = 0;
+			[2] = 0
+		}
+
+		local cloned_option_1 = (typeof(option_1) == 'table' and table.clone(option_1)) or nil
+		local cloned_option_2 = (typeof(option_2) == 'table' and table.clone(option_2)) or nil
+
+		local function Ask_Interest(topic: askable_topic, asking: ai_interest)
+			option_score[1] += How_Much_Are_You_Interested_In_This(cloned_option_1[topic],asking,cloned_option_1,cloned_option_1.action_status == 'upgrade' and 0.1)
+			option_score[2] += How_Much_Are_You_Interested_In_This(cloned_option_2[topic],asking,cloned_option_2,cloned_option_2.action_status == 'upgrade' and 0.1)
+		end
+
+		if cloned_option_2 and cloned_option_1 then
+			Ask_Interest('yen_goal','Price')
+			Ask_Interest('cur_upgrade_level','Level')
+			Ask_Interest('rarity_level','Rarity')
+			Ask_Interest('slot_order','Slot')
+		end
+
+		Adjust_Queues(option_1,option_2,option_score, "queue_upgrade")
+
+	end,
+}
+
+local Queue_Actions = {
+	['placement'] = function(cur_queue_data)
+		
+		Place_Unit_Here(cur_queue_data,Seek_Placeable_Position())
+		
+		return true
+	end,
+	
+	['upgrade'] = function(cur_queue_data)
+		Upgrade_This_Unit(cur_queue_data)
+		
+		return true
+	end,
+}
+
+function Adjust_Rank()
+	task.wait(1)
+	
+	
+	for _,v in Available_Units_Info do
+		if not table.find(Info_Ranking.Rarity,v.rarity_level) then
+			table.insert(Info_Ranking.Rarity,v.rarity_level)
+		end
+		
+		if not table.find(Info_Ranking.Price,v.yen_goal) then
+			table.insert(Info_Ranking.Price,v.yen_goal)
+		end
+		
+		
+		if not table.find(Info_Ranking.Level,v.cur_upgrade_level) then
+			table.insert(Info_Ranking.Level,v.cur_upgrade_level)
+		end
+		
+		if not table.find(Info_Ranking.Slot,v.slot_order) then
+			table.insert(Info_Ranking.Slot,v.slot_order)
+		end
+		
+
+	end
+	
+	table.sort(Info_Ranking.Rarity, function(a,b)
+		return a > b
+	end)
+	
+	table.sort(Info_Ranking.Price, function(a,b)
+		return a > b
+	end)
+	
+	table.sort(Info_Ranking.Level, function(a,b)
+		return a > b
+	end)
+	
+	table.sort(Info_Ranking.Slot, function(a,b)
+		return a < b
+	end)
+end
+
+function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
+	
+	if not option_1 and not option_2 then
+		return
+	end
+	
+	if (option_1 == option_2) then
+		return
+	end
+	
+	if not option_2 and option_1 then
+		table.insert(Queues,option_1)
+		
+		return
+	end
+	
+	if not option_1 and option_2 then
+		table.insert(Queues,option_2)
+	
+		return
+	end
+	
+	--[[table.sort(score_sheet, function(a,b)
+		return a > b
+	end)]]
+	
+	local option_2_index = table.find(Queues, option_2)
+	
+	if not option_2_index then
+		return
+	end
+	
+	--[[if last_problem == 'queue_upgrade' then --Upgrade queue take lower priority
+		score_sheet[1] /= (2 * (option_1.cur_upgrade_level))
+	end]]
+	
+	if score_sheet[1] <= score_sheet[2] then
+		
+		local exist_index = table.find(Queues,option_1)
+		
+		if exist_index then
+			table.remove(Queues,exist_index)
+			option_2_index = table.find(Queues, option_2)
+		end
+		
+		if not option_2_index then
+			return
+		end
+		
+		table.insert(Queues,option_2_index+1,option_1)
+		
+		if last_problem then
+			ProblemsSolver[last_problem](option_1,table.find(Queues,option_1)+1) --Recursive to check if this value also lower than older queues
+		end
+		
+		
+	else--Value are not any lower get in between current index
+		table.insert(Queues,option_2_index,option_1)
+	end
+	
+end
+
+function Ask_AI_Decision(option_1, option_2, problem: problems,...)
+	return ProblemsSolver[problem](option_1,option_2,...)
+end
+
+function GetPrioritized_Level(full_data) --Lower number mean higher priority
+	
+end
+
+local Comp_Handler = {
+	["Spread Upgrade"] = function(data)
+		
+		local function AddUpgradeQueue(Added_Data,placed_position)
+
+			local data = Added_Data
+			local new = {}
+
+			for i,v in data do
+				if typeof(v) == 'table' then
+					continue
+				end
+
+				new[i] = v
+			end
+
+			new.statics = {}
+
+			new.placed_info = {}
+
+			for i,v in data.statics do
+				new.statics[i] = v
+			end
+
+			table.insert(data.placed_info,new)
+
+			local data = new
+			local index = #data.placed_info
+
+			
+			
+			if not data.position and placed_position then
+				data.position = placed_position
+			end
+			
+			--data.unit_name = States.general.last_placing_unit
+
+			local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][data.cur_upgrade_level+1]
+			
+			--data.cur_upgrade_level += 1
+
+			if not next_level_data and data.cur_upgrade_level <= 1 then
+				StarterGui:SetCore('SendNotification', {
+					Title = 'มีการ Error เกิดขึ้น';
+					Text = 'ไม่พบข้อมูลตัวละครที่พึ่งวางไป';
+					Duration = 5
+				})
+				return
+			end
+
+			data.yen_goal = next_level_data.Cost
+			data.action_status = 'upgrade'
+			Ask_AI_Decision(data,Queues[1], "queue_upgrade")
+		end
+		
+		Connections.comps.OnUnitPlaced = Events.comps.OnUnitPlaced.Event:Connect(function(data, placed_position)
+			AddUpgradeQueue(data,placed_position)
+		end)
+		
+		Connections.comps.OnUnitUpgraded = Events.comps.OnUnitUpgraded.Event:Connect(function(data)
+			AddUpgradeQueue(data)
+		end)
+		
+		Connections.comps.OnUnitAddedToInventory = Events.core.OnUnitAddedToInventory.Event:Connect(function(unit_id)
+			
+			
+		end)
+		
+		Connections.comps.OnGameStarted = Events.core.OnGameStarted.Event:Once(function()
+			
+			local option_score = {}
+			
+			
+			local options = {}
+			
+			for i,v in Available_Units_Info do
+				options[i] = table.clone(v)
+				
+				option_score[i] = {0,v}
+			end
+
+			local function Ask_Interest(topic: askable_topic, asking: ai_interest)
+				for i,v in options do
+					option_score[i][1] += How_Much_Are_You_Interested_In_This(v[topic],asking,v)
+				end
+			end
+
+			Ask_Interest('yen_goal','Price')
+			Ask_Interest('cur_upgrade_level','Level')
+			Ask_Interest('rarity_level','Rarity')
+			Ask_Interest('slot_order','Slot')
+			
+			table.sort(option_score, function(a,b)
+				return a[1] > b[1]
+			end)
+			
+			for i,v in option_score do
+				for i = 1, AI_Config["Comp Settings"].Unit_Placement[i] or 1 do
+					Ask_AI_Decision(v[2],Queues[1], "queue_placement")
+				end
+			end
+		end)
+		
+		Events.comps.IsCompSatisfied.OnInvoke = function(data)
+			if not Upgrade_Data[data.unit_name] then --No upgrade data?
+				return false
+			end
+			
+			local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level]
+			
+			if not next_level_data then --Maxed out?
+				return true
+			end
+			
+			return data.cur_upgrade_level > 2 * States.comps.cycle
+		end
+	end,
+}
+
+local function Color_Similarity(Color_1: Color3, Color_2: Color3) --Higher mean not closer
+	local R1, G1, B1 = Color_1.R, Color_1.G, Color_1.B
+	local R2, G2, B2 = Color_2.R, Color_2.G, Color_2.B
+	local R, G, B = (R1 - R2), (G1 - G2), (B1 - B2)
+
+	return math.sqrt((R^2) +( G^2) + (B^2))
+end
+
+local function IsAPlacingUnit(Model: Model?)
+	
+	if not Model:IsA("Model") then
+		return false
+	end
+
+	if not Model:FindFirstChildOfClass("Humanoid") or game:GetService("Players"):GetPlayerFromCharacter(Model) then
+		return false
+	end
+
+	if not Model:GetAttribute("Entity") or not Model:GetAttribute("ClientEntity") then
+		return true
+	end
+
+	return true
+end
+
+local function Predict_Rarity(Gradient_To_Predict_From : UIGradient) : rarity
+
+	if #Gradient_To_Predict_From.Color.Keypoints >= 6 then
+
+		local Lean_To_White = 0
+		local Required = #Gradient_To_Predict_From.Color.Keypoints/2
+
+		for _, keypoint in Gradient_To_Predict_From.Color.Keypoints do
+			if Color_Similarity(Color3.new(1,1,1),keypoint.Value) <= 0.45 then
+				Lean_To_White += 1
+			end
+		end
+
+		if Lean_To_White >= Required then
+			return "Limited"
+
+		else
+			return 'Mystical'
+		end
+
+	end
+
+
+	for rarity, list_color in Possible_Colors do
+		--Score_Sheet[i] = 10 + (0.5 * #list_color)  --Score will be subtract more when a color is not similair (also slightly add score on multiple color check)
+
+
+		local Half = math.floor(#list_color/2)
+		local Similair_Count = 0
+		for _, keypoint in Gradient_To_Predict_From.Color.Keypoints do
+
+
+			for _,v : Color3 in list_color do
+				if Color_Similarity(keypoint.Value,v) <= 0.3 then
+					Similair_Count += 1
+				end
+
+				if Similair_Count > Half or Similair_Count == #list_color then
+					return rarity
+				end
+			end
+		end
+
+	end
+
+	return warn("Can't predict rarity")
+end
+
+function Upgrade_This_Unit(queue_data)
+	
+	
+	local Guis_Folder = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs :: Folder
+	local UnitBillboard = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard :: BillboardGui
+	local Price_Label = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard.MainFrame.HolderButtons.UpgradeButton.TextLabel :: TextLabel
+	
+	Camera.CameraType = Enum.CameraType.Scriptable
+	
+	local cur_unit_button = queue_data.statics.frame :: Frame
+	local Position = queue_data.position
+	
+	Toolbar.Visible = false
+
+	local Tween = TweenService:Create(Camera,TweenInfo.new(0.35), {CFrame = CFrame.new(Position+ Vector3.new(0,8,0), Position)})
+
+
+	Tween.Completed:Once(function()
+		click_this_gui(cur_unit_button)
+		task.wait(0.15)
+		
+		task.wait(0.25)
+		
+		
+		local vector: Vector3 = Camera:WorldToViewportPoint(Position)
+		local screenPoint = Vector2.new(vector.X, vector.Y)
+		
+		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
+		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+		
+		while not UnitBillboard.Enabled do
+			task.wait(0.25)
+			
+			vector= Camera:WorldToViewportPoint(Position)
+			screenPoint = Vector2.new(vector.X, vector.Y)
+
+
+			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
+			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+		end
+
+		Upgrade_Button.Parent = Guis_Folder
+		
+		local Retry = 0
+		
+		while task.wait(0.25) do
+			if #Price_Label.Text:gsub(",",""):match("%d+") > 0 or Retry >= 20 then
+				break
+			end
+			
+			Retry += 1
+		end
+		
+		if Retry >= 20 then
+			Toolbar.Visible = true
+			Upgrade_Button.Parent = HolderButtons
+			Upgrade_This_Unit(queue_data)
+			
+			return
+		end
+		
+		task.wait(0.5)
+
+		Retry = 0
+		
+		local old_price = tonumber(Price_Label.Text:gsub(",",""):match("%d+"))
+
+		while old_price == tonumber(Price_Label.Text:gsub(",",""):match("%d+")) do
+
+			task.wait(0.25)
+			click_this_gui(Upgrade_Button)
+
+			Retry += 1
+			
+			if Retry >= 10 then
+				break
+			end
+		end
+		
+		Upgrade_Button.Parent = HolderButtons
+
+		table.remove(Queues,table.find(Queues,queue_data))
+		
+		local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][queue_data.cur_upgrade_level+1]
+		queue_data.cur_upgrade_level += 1
+		
+		queue_data.yen_goal = next_level_data.Cost
+		
+		ZoomOut()
+		
+		Toolbar.Visible = true
+		
+		queue_data.action_in_progress = false
+		if Retry >= 10 then
+			return true
+		end
+
+		
+		Events.comps.OnUnitUpgraded:Fire(queue_data, Position)
+
+		task.wait(0.25)
+
+		if not next_level_data then --Maxed?
+			return true
+		end
+
+		return
+	end)
+	
+	
+	Tween:Play()
+	
+	return true
+end
+
+function ZoomOut()
+	TweenService:Create(Camera,TweenInfo.new(1,Enum.EasingStyle.Sine), {CFrame = CFrame.new(Camera.CFrame.Position + (Vector3.yAxis * 30))*Camera.CFrame.Rotation}):Play()
+end
+
+function Place_Unit_Here(queue_data, Position: Vector3)
+	
+	Position = Position or Seek_Placeable_Position()
+	
+	Camera.CameraType = Enum.CameraType.Scriptable
+
+	local cur_unit_button = queue_data.statics.frame :: Frame
+
+	local Tween = TweenService:Create(Camera,TweenInfo.new(0.35), {CFrame = CFrame.new(Position+ Vector3.new(0,8,0), Position)})
+	
+
+	Tween.Completed:Once(function()
+		click_this_gui(cur_unit_button)
+		task.wait(0.15)
+		
+		local Retry = 0
+		
+		while not States.general.last_placing_model do
+			task.wait()
+			click_this_gui(cur_unit_button)
+			
+			Retry += 1
+			
+			if Retry >= 15 then
+				Toolbar.Visible = true
+				
+				table.insert(blacklist_location,Position)
+				Place_Unit_Here(queue_data,Seek_Placeable_Position())
+				return
+			end
+			
+		end
+
+
+		Toolbar.Visible = false
+		task.wait(0.75)
+		
+		local vector: Vector3 = Camera:WorldToViewportPoint(Position)
+		local screenPoint = Vector2.new(vector.X, vector.Y)
+		
+
+		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
+		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+		
+		task.wait(0.75)
+		
+		Retry = 0
+		
+		while States.general.last_placing_model do
+			
+			if Retry >= 5 then
+				
+				table.insert(blacklist_location, Position)
+				Toolbar.Visible = true
+				Place_Unit_Here(queue_data,Seek_Placeable_Position())
+				return
+			end
+			
+			task.wait(0.25)
+			
+			local offset = {
+				x = 0 + (Retry * Random:NextNumber(-50,50));
+				y = 0 + (Retry * Random:NextNumber(-50,50))
+			}
+			
+			VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
+			VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
+			
+			Retry += 1
+		end
+		
+		ZoomOut()
+		
+		Toolbar.Visible = true
+		
+		table.remove(Queues,table.find(Queues,queue_data))
+
+		
+		queue_data.action_in_progress = false
+		Events.comps.OnUnitPlaced:Fire(queue_data, Position)
+
+	end)
+	Tween:Play()
+	
+end
+
+function Seek_Placeable_Position()
+	
+	if not Current_Tracking_Node then
+		return warn("Ran out of tracking node")
+	end
+	
+	--Raycast 4 directions
+	local Directions = {
+		Vector3.new(1, 0, 0),
+		Vector3.new(-1, 0, 0),
+		Vector3.new(0, 0, 1),
+		Vector3.new(0, 0, -1)
+	}
+	
+	local Placement_Position
+	local blacklist_distance = 1 --Can't place with these distance of blacklisted location
+	
+	for _, dir in Directions do
+		local Result = workspace:Raycast(Current_Tracking_Node.Position + (dir * Config["Minimum Distance From Node"]) + (Vector3.yAxis * 8), Vector3.yAxis * -20,Raycast)
+
+		
+		if not Result or Result.Instance.Parent.Name == "Path" or IsAPlacingUnit(Result.Instance.Parent) then
+			if Result then
+				table.insert(blacklist_location, Result.Position)
+				
+			end
+			
+			continue
+		end
+
+		Placement_Position = Result.Position
+		
+		for _,v in blacklist_location do
+			if (Result.Position - v).Magnitude <= blacklist_distance then
+				Placement_Position = nil
+				break
+			end	
+		end
+
+		if not Placement_Position then
+			continue
+		end
+		
+		break
+	end
+	
+	
+	if not Placement_Position then
+		Current_Tracking_Node = Selected_Folder:FindFirstChild(tostring(tonumber(Current_Tracking_Node.Name)-1))
+		
+		
+		return Seek_Placeable_Position() --Recursive?
+	end
+	
+	
+	return Placement_Position
+end
+
+
+
+local function Add_Information(Unit_Frame: Frame?)
+	local Button = Unit_Frame.Button :: TextButton
+	local UnitLevel = tonumber(Button.UnitNameLabel.Text:gsub(",",""):match("%d+"))
+	local UnitCost = tonumber(Button.TowerCostFrame.CostLabel.Text:gsub(",",""):match("%d+"))
+	
+	Available_Units_Info[Unit_Frame.LayoutOrder] = {
+		
+		statics = {
+			level = UnitLevel; --Unit level not upgrade
+			cost = UnitCost; --Placement cost
+			rarity = Predict_Rarity(Button.BackgroundFrame.UIGradient); --Rarity in string
+			
+			frame = Unit_Frame
+		};
+		
+		unit_name = `{Button.ViewportFrame.WorldModel:FindFirstChildOfClass("Model").Name}`;
+		rarity_level = 0;
+		yen_goal = 0; --Required yen to perform action
+		cur_upgrade_level = 1;
+		slot_order = Unit_Frame.LayoutOrder;
+		action_status = 'placement' :: queue_status;
+		action_in_progress = false;
+		
+		placed_info = {
+				
+		};
+		
+	}
+	
+	Available_Units_Info[Unit_Frame.LayoutOrder].rarity_level = Rarity_Level_From_String[Available_Units_Info[Unit_Frame.LayoutOrder].statics.rarity]
+	Available_Units_Info[Unit_Frame.LayoutOrder].yen_goal = UnitCost
+	
+	--warn(`Unit with cost: {UnitCost} Have rarity of: {Available_Units_Info[Unit_Frame.LayoutOrder].statics.rarity}`)
+	
+	--warn(``)
+	Events.core.OnUnitAddedToInventory:Fire(Unit_Frame.LayoutOrder)
+end
+
+local function Initialize_Available_Unit()
+
+	if not game:IsLoaded() then
+		game.Loaded:Wait()
+	end
+
+	if not plr.Character then
+		plr.CharacterAdded:Wait()
+	end
+	
+	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
+		if not MatchResultPage.Visible then
+			return
+		end
+
+		Clear_For_Next_Stage()
+	end)
+	
+	Comp_Handler[AI_Config["Comp Behavior"]]()
+	
+	StarterGui:SetCore("SendNotification", {
+		Title = 'ระบบกำลังคำนวน';
+		Text = 'กำลังรอข้อมูลตัวละคร'
+	})
+	
+	
+	
+	for _,v in UnitHolder:GetChildren() do
+		
+		if not v:IsA("Frame") then
+			continue
+		end
+		
+		if v.Name == "LockedFrame" then
+			v:GetPropertyChangedSignal("Name"):Once(function()
+				Add_Information(v)
+			end)
+		else
+			Add_Information(v)
+		end
+	end
+	
+	--[[while task.wait() do
+		for _,v in UnitHolder:GetChildren() do
+			if not v:IsA("Frame") then
+				continue
+			end
+
+			if v.Name ~= "LockedFrame" then
+				Adjust_Rank()
+				break
+			end
+		end
+	end]]
+	Events.core.OnGameStarted:Fire()
+	
+	if #Queues > 1 then
+		Adjust_Queues(Queues[1],Queues[2],{0,0})
+	end
+	
+	task.wait(3)
+	StarterGui:SetCore("SendNotification", {
+		Title = 'ระบบเริ่มทำงานแล้ว';
+		Text = 'เริ่มทำการ เล่นอัตโนมัติ'
+	})
+	
+	
+end
+
+
+function How_Much_Are_You_Interested_In_This(base_score: number, asking_about: ai_interest, options_data, topic_multiplier: boolean)
+	
+	local multiplier = 1
+	
+	if options_data then
+		if Events.comps.IsCompSatisfied:Invoke(options_data) then --Massively lower interest if already satisfied comp
+			multiplier = 0.01
+		end
+	end
+	
+	return base_score * Preset.AI[AI_Config["AI Preset"]][asking_about] * multiplier * (topic_multiplier or 1)
+end
+
+function Queues_Checker(current_yen)
+	local cur_queue_data = Queues[1]
+	
+	if not cur_queue_data or not cur_queue_data.yen_goal or (cur_queue_data.yen_goal > current_yen) or cur_queue_data.action_in_progress then
+		
+		if cur_queue_data and not cur_queue_data.yen_goal then
+			table.remove(Queues,1) --Remove from queue
+		end
+		
+		return
+	end
+
+	if cur_queue_data then
+
+		warn('----------------------')
+		warn(cur_queue_data.yen_goal)
+
+		local TabLevel = 0
+		local plr = game:GetService("Players").LocalPlayer
+		local function PrintTable(Table)
+			for Key,Value in pairs(Table) do
+				if typeof(Value) == "table" then
+					TabLevel = TabLevel + 1
+					warn(string.rep("    ",TabLevel - 1)..Key.." : {")
+					PrintTable(Value)
+					warn(string.rep("    ",TabLevel - 1).."}")
+					TabLevel = TabLevel - 1
+				else
+					warn(string.rep("    ",TabLevel)..Key,Value)
+				end
+			end
+		end
+
+		PrintTable(cur_queue_data)
+
+	end
+	
+	cur_queue_data.action_in_progress = true
+	
+	
+	local recorded_action = cur_queue_data.action_status
+
+	local sucess, err = Queue_Actions[cur_queue_data.action_status](cur_queue_data)
+	
+	
+	
+	if sucess then
+		warn("SUCCESS!")
+	end
+	
+	if not sucess then
+		warn('Recorded Action: ', recorded_action)
+		print(err)
+		error(err)
+	end
+	
+	
+
+end
+
+function click_this_gui(to_click: GuiObject)
+	local Inset = GuiService:GetGuiInset()
+
+
+	local AbsoluteSize = to_click.AbsoluteSize
+	local Offset = {
+		x = AbsoluteSize.X/2,
+		y = AbsoluteSize.Y/2
+	}
+
+	local x,y = to_click.AbsolutePosition.X + Offset.x ,to_click.AbsolutePosition.Y + Offset.y
+
+	VirtualInputManager:SendMouseButtonEvent(x+Inset.X,y+Inset.Y,0,true,game,0)
+	VirtualInputManager:SendMouseButtonEvent(x+Inset.X,y+Inset.Y,0,false,game,0)
+end
+
+workspace.ChildAdded:Connect(function(child)
+	if not child:IsA("Model") then
+		return
+	end
+	
+	if not IsAPlacingUnit(child) then
+		return
+	end
+	
+	States.general.last_placing_unit = child.Name
+	States.general.last_placing_model = child
+	
+	child.Destroying:Once(function()
+		States.general.last_placing_model = nil
+	end)
+end)
+
+
+Connections.general.yen_tracking = yen_value.Changed:Connect(Queues_Checker)
+
+--TextChatService.ChatVersion = Enum.ChatVersion.LegacyChatService
+
+local TextChatService = game:GetService("TextChatService")
+
+if TextChatService:FindFirstChild("ClearCommand") then
+	TextChatService.ClearCommand:Destroy()
+end
+
+local ClearCommand = Instance.new("TextChatCommand")
+
+ClearCommand.Name = 'ClearCommand'
+
+ClearCommand.PrimaryAlias = '/clear'
+ClearCommand.SecondaryAlias = '/c'
+ClearCommand.Parent = TextChatService
+
+function Clear_For_Next_Stage()
+	
+	
+	
+	table.clear(Queues)
+	table.clear(Available_Units_Info)
+	table.clear(blacklist_location)
+	table.clear(Info_Ranking)
+	
+	task.wait(0.15)
+	
+	local PlayNext = game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Main.Options.PlayNextButton :: TextButton
+	
+	if PlayNext.Visible then
+		StarterGui:SetCore("SendNotification", {
+			Title = 'ไปชั้นถัดไป';
+			Text = 'กำลังล้างข้อมูล ด่านที่แล้ว';
+			Duration = 3
+		})
+	else
+		StarterGui:SetCore("SendNotification", {
+			Title = 'ไม่ผ่านด่าน';
+			Text = 'ระบบจะไม่ทำการออโต้หากแพ้';
+			Duration = 10
+		})
+		
+		return
+	end
+	task.wait(1)
+	
+	while MatchResultPage.Visible do
+		click_this_gui(PlayNext)
+		
+		task.wait(0.15)
+	end
+	
+	Queues_Checker(yen_value.Value)
+	
+	Toolbar.Visible = true
+	Upgrade_Button.Parent = HolderButtons
+	
+	Initialize_Available_Unit()
+end
+
+
+
+ClearCommand.Triggered:Once(function()
+	--Disconnect all connections
+
+	StarterGui:SetCore("SendNotification", {
+		Title = 'Disconnect';
+		Text = 'Clear Auto Play Successfully';
+		Duration = 3
+	})
+	for _,v in Connections do
+		for _,v2 in v do
+			v2:Disconnect()
+		end
+	end
+
+	for _,v in Events do
+		for _,v2 in v do
+			v2:Destroy()
+		end
+	end
+end)
+
+
+--[[TextChatService.OnIncomingMessage:Connect(function(txt)
+	command_process(txt.Text)
+	
+	return txt
+end)
+]]
+
+if not MatchResultPage.Visible then
+	Initialize_Available_Unit()
+
+	Queues_Checker(yen_value.Value)
+else
+	Clear_For_Next_Stage()
+end
+
+
+
+StarterGui:SetCore("SendNotification", {
+	Title = 'Finished';
+	Text = 'Auto Play Agent Ready';
+	Duration = 3
+})
