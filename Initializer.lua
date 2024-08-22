@@ -140,8 +140,13 @@ getgenv().Configuration = {
 	},
 	['Placement Distance'] = 9,
 	
-	["Farm Tower Of Eternity Mode"] = false --ฟาร์มหอคอย true คือใช่ false คือไม่
+	["Farm Tower Of Eternity Mode"] = false; --ฟาร์มหอคอย true คือใช่ false คือไม่
+	
 };
+
+getgenv().Merge_States = {
+	['Enabled'] = true
+}
 
 local function IsInLobbyGame()
 	return game.GameId == 17017769292 or game.GameId == 5836869368
