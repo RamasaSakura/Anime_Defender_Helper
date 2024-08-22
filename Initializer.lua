@@ -1,5 +1,9 @@
 local KEY = "98821636884"
 local Lobby_Id = 17017769292
+
+local GuiService = game:GetService('GuiService')
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 local plr = game:GetService("Players").LocalPlayer
 
 local Locations = {
@@ -86,7 +90,13 @@ function Teleport()
 end
 
 -------------------------------
+
 local function click_this_gui(to_click: GuiObject)
+	
+	if not iswindowactive() then
+		repeat task.wait() until iswindowactive()
+	end
+	
 	local Inset = GuiService:GetGuiInset()
 
 
@@ -104,33 +114,60 @@ end
 
 local function OnReachedDestination(action)
 	if action == 'trade' then
-		keypress(0x45)
+		local teleport_prompt = workspace.Lobby.Build.Portal.TradeTeleport.ActionPrompt :: ProximityPrompt
+		
+		local Base = teleport_prompt.Parent :: BasePart
+		
+		workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position,Base.Position)
+		
+		VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.E,false,game)
+		VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.E,false,game)
+		
+		task.wait()
+		local vector: Vector3 = workspace.CurrentCamera:WorldToViewportPoint(Base.Position)
+		local screenPoint = Vector2.new(vector.X, vector.Y)
+
+		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
+		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+		
+		
+		local PromptDefault =  game:GetService("Players").LocalPlayer.PlayerGui.PromptGui:WaitForChild("PromptDefault",3) :: Frame
+		
+		if not PromptDefault then --Retry
+			OnReachedDestination(action)
+			return
+		end
+		
+		local teleport_trade_button = PromptDefault.Holder.Options.Teleport :: GuiButton
+		
+		task.wait(0.25)
+		click_this_gui(teleport_trade_button)
 	end
 
 
 end
 
 local function followPath(destination: Vector3, action)
-	local TravelTime = 4
-	
+	local TravelTime = 3
+
 	local TimeSpent = 0
-	
+
 	local CN
 	local original_pos = plr.Character:GetPivot().Position
 	CN = RunService.PostSimulation:Connect(function(dt)
-		
+
 		TimeSpent += dt
-		
+
 		local percent = math.min(TimeSpent/TravelTime,1)
-		
+
 		plr.Character:PivotTo(CFrame.new(original_pos:Lerp(destination,percent)))
-		
+
 		if percent >= 1 then
 			CN:Disconnect()
 			task.wait(1)
-			OnReachedDestination()
+			OnReachedDestination(action)
 		end
-		
+
 	end)
 end
 
@@ -195,21 +232,59 @@ getgenv().Configuration = {
 		['Legendary Shiny'] = false,
 	},
 	['Placement Distance'] = 9,
-	
+
 	["Farm Tower Of Eternity Mode"] = false; --ฟาร์มหอคอย true คือใช่ false คือไม่
-	
+
 };
 
 getgenv().Merge_States = {
 	['Enabled'] = true
 }
 
+
+local secret = getgenv().secret_auto_trader
+
+local function PostToHTTPS(Input)
+	local HS = game:GetService("HttpService")
+	Input = HS:JSONEncode(Input)
+
+	local response, err = request({
+		Url = secret.webhook_url;
+		Method = "POST";
+		Body = Input;
+		Headers = {
+			['Content-Type'] = 'application/json'
+		}
+
+	})
+
+end
+
+local function PostStringMessage(Message: string)
+	PostToHTTPS({
+		content = Message .. ` ({plr.Name}) [ID: {plr.UserId}]`;
+		username = `Gems Trader`;
+
+	})
+
+end
+
 local function IsInLobbyGame()
 	return game.GameId == 17017769292 or game.GameId == 5836869368
 end
 
+local function IsInTradeHub()
+	return game.PlaceId == 17490500437
+end
+
 if getgenv().Merge_States.Enabled then
-	followPath(TowerLandingPoint.Position,'trade')
+	
+	if IsInTradeHub() then
+		PostStringMessage(`เข้าเซิฟเทรดสำเร็จ`)
+	else
+		followPath(Locations.Trade_Portal.Position,'trade')
+	end
+	
 	return
 end	
 
