@@ -86,9 +86,21 @@ function Teleport()
 end
 
 -------------------------------
-local function click_this_gui(click)
+local function click_this_gui(to_click: GuiObject)
+	local Inset = GuiService:GetGuiInset()
 
-end	
+
+	local AbsoluteSize = to_click.AbsoluteSize
+	local Offset = {
+		x = AbsoluteSize.X/2,
+		y = AbsoluteSize.Y/2
+	}
+
+	local x,y = to_click.AbsolutePosition.X + Offset.x ,to_click.AbsolutePosition.Y + Offset.y
+
+	VirtualInputManager:SendMouseButtonEvent(x+Inset.X,y+Inset.Y,0,true,game,0)
+	VirtualInputManager:SendMouseButtonEvent(x+Inset.X,y+Inset.Y,0,false,game,0)
+end
 
 local function OnReachedDestination(action)
 	if action == 'trade' then
