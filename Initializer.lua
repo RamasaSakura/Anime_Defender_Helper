@@ -85,6 +85,46 @@ function Teleport()
 	end
 end
 
+-------------------------------
+local function click_this_gui(click)
+
+end	
+
+local function OnReachedDestination(action)
+	if action == 'trade' then
+		keypress(0x45)
+	end
+
+
+end
+
+local function followPath(destination: Vector3, action)
+	local TravelTime = 4
+	
+	local TimeSpent = 0
+	
+	local CN
+	local original_pos = plr.Character:GetPivot().Position
+	CN = RunService.PostSimulation:Connect(function(dt)
+		
+		TimeSpent += dt
+		
+		local percent = math.min(TimeSpent/TravelTime,1)
+		
+		plr.Character:PivotTo(CFrame.new(original_pos:Lerp(destination,percent)))
+		
+		if percent >= 1 then
+			CN:Disconnect()
+			task.wait(1)
+			OnReachedDestination()
+		end
+		
+	end)
+end
+
+
+---------------------------------------
+
 
 task.spawn(function()
 
@@ -155,6 +195,11 @@ getgenv().Merge_States = {
 local function IsInLobbyGame()
 	return game.GameId == 17017769292 or game.GameId == 5836869368
 end
+
+if getgenv().Merge_States.Enabled then
+	followPath(TowerLandingPoint.Position,'trade')
+	return
+end	
 
 if getgenv().Configuration["Farm Tower Of Eternity Mode"] and IsInLobbyGame() then
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/RamasaSakura/Anime_Defender_Helper/main/Helpers/AD_Auto_Tower.lua'))(KEY)
