@@ -13,8 +13,8 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 
 local Config = {
-	["Node Distance From Spawner"] = 6;
-	["Minimum Distance From Node"] = 3
+	["Node Distance From Spawner"] = 10;
+	["Minimum Distance From Node"] = 4
 };
 
 local AI_Config = {
@@ -64,7 +64,7 @@ local Preset = {
 			Price = -50;
 			Level = -50;
 			Rarity = 200;
-			Slot = 0.1
+			Slot = -10
 		};
 		
 		[''] = { --ปรับเองได้
@@ -298,6 +298,8 @@ local ProblemsSolver = {
 		end
 
 		Adjust_Queues(option_1,option_2,option_score, "queue_upgrade")
+		
+		
 
 	end,
 }
@@ -376,7 +378,7 @@ function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
 	end
 	
 	if not option_1 and option_2 then
-		table.insert(Queues,option_2)
+		--table.insert(Queues,option_2)
 	
 		return
 	end
@@ -395,9 +397,9 @@ function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
 		score_sheet[1] /= (2 * (option_1.cur_upgrade_level))
 	end]]
 	
-	if score_sheet[1] <= score_sheet[2] then
+	if score_sheet[1] > score_sheet[2] then
 		
-		local exist_index = table.find(Queues,option_1)
+		--[[local exist_index = table.find(Queues,option_1)
 		
 		if exist_index then
 			table.remove(Queues,exist_index)
@@ -406,7 +408,7 @@ function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
 		
 		if not option_2_index then
 			return
-		end
+		end]]
 		
 		table.insert(Queues,option_2_index+1,option_1)
 		
@@ -418,6 +420,19 @@ function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
 	else--Value are not any lower get in between current index
 		table.insert(Queues,option_2_index,option_1)
 	end
+	
+	
+	if option_1.action_status == 'upgrade' then --Move to last if upgrade
+		local option_1_index = table.find(Queues,option_1)
+		
+		if option_1_index then
+			table.remove(Queues,option_1_index)
+			table.insert(Queues,option_1)
+		end
+		
+		
+	end
+	
 	
 end
 
@@ -533,7 +548,7 @@ local Comp_Handler = {
 		end)
 		
 		Events.comps.IsCompSatisfied.OnInvoke = function(data)
-			if not Upgrade_Data[data.unit_name] then --No upgrade data?
+			--[[if not Upgrade_Data[data.unit_name] then --No upgrade data?
 				return false
 			end
 			
@@ -543,7 +558,8 @@ local Comp_Handler = {
 				return true
 			end
 			
-			return data.cur_upgrade_level > 2 * States.comps.cycle
+			return data.cur_upgrade_level > 2 * States.comps.cycle]]
+			return false --Test
 		end
 	end,
 }
@@ -626,7 +642,7 @@ function Upgrade_This_Unit(queue_data)
 	
 	local Guis_Folder = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs :: Folder
 	local UnitBillboard = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard :: BillboardGui
-	local Price_Label = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard.MainFrame.HolderButtons.UpgradeButton.TextLabel :: TextLabel
+	local Price_Label = HolderButtons:WaitForChild('UpgradeButton',5).TextLabel :: TextLabel
 	
 	Camera.CameraType = Enum.CameraType.Scriptable
 	
@@ -744,25 +760,27 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 	
 	Position = Position or Seek_Placeable_Position()
 	
+	if not Position then
+		queue_data.action_in_progress = false
+		return
+	end
+	
 	Camera.CameraType = Enum.CameraType.Scriptable
 
 	local cur_unit_button = queue_data.statics.frame :: Frame
 
-	local Tween = TweenService:Create(Camera,TweenInfo.new(0.35), {CFrame = CFrame.new(Position+ Vector3.new(0,8,0), Position)})
+	local Tween = TweenService:Create(Camera,TweenInfo.new(0.1), {CFrame = CFrame.new(Position+ Vector3.new(0,8,0), Position)})
 	
 
 	Tween.Completed:Once(function()
-		click_this_gui(cur_unit_button)
+		--click_this_gui(cur_unit_button)
 		task.wait(0.15)
 		
 		local Retry = 0
 		
 		while not States.general.last_placing_model do
-			task.wait()
-			click_this_gui(cur_unit_button)
 			
-			Retry += 1
-			
+
 			if Retry >= 15 then
 				Toolbar.Visible = true
 				
@@ -771,26 +789,39 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 				return
 			end
 			
+			Retry += 1
+			click_this_gui(cur_unit_button)
+			
+			task.wait(0.5)
 		end
-
-
+		
+		if Retry >= 15 or not States.general.last_placing_model then
+			return
+		end
+		
 		Toolbar.Visible = false
-		task.wait(0.75)
+
+		local model = States.general.last_placing_model:: Model
 		
-		local vector: Vector3 = Camera:WorldToViewportPoint(Position)
-		local screenPoint = Vector2.new(vector.X, vector.Y)
+		model:WaitForChild("Humanoid")
+		model:WaitForChild("HumanoidRootPart")
+	
+		local vector: Vector3 = Camera:WorldToScreenPoint(Position)
+		--local screenPoint = Vector2.new(vector.X, vector.Y)
 		
 
-		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
-		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+		--VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
+		--VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
 		
-		task.wait(0.75)
+		task.wait(0.5)
+		
 		
 		Retry = 0
+		local _,size = model:GetBoundingBox()
 		
 		while States.general.last_placing_model do
 			
-			if Retry >= 5 then
+			if Retry >= 10 then
 				
 				table.insert(blacklist_location, Position)
 				Toolbar.Visible = true
@@ -798,16 +829,25 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 				return
 			end
 			
-			task.wait(0.25)
+			--Toolbar.Visible = false
+			task.wait(0.35)
 			
 			local offset = {
-				x = 0 + (Retry * Random:NextNumber(-50,50));
-				y = 0 + (Retry * Random:NextNumber(-50,50))
+				x = 0 + (Retry * Random:NextNumber(-5,5));
+				y = 0 + (Retry * Random:NextNumber(-5,5))
 			}
 			
-			VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
-			VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
+			--print(`Distance: {(Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.X) - Position).Magnitude}`)
 			
+			if Retry <= 2 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 2) then
+				--Test area to see if it placeable
+				VirtualInputManager:SendMouseMoveEvent(vector.X+offset.x,vector.Y+offset.y,game)
+				model:PivotTo(CFrame.new(Position + Vector3.new(0,size.Y/2,0)))
+			else
+				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
+				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
+			end
+
 			Retry += 1
 		end
 		
@@ -859,7 +899,7 @@ function Seek_Placeable_Position()
 		Placement_Position = Result.Position
 		
 		for _,v in blacklist_location do
-			if (Result.Position - v).Magnitude <= blacklist_distance then
+			if (Vector3.new(Result.Position.X,v.Y,Result.Position.Z) - v).Magnitude <= blacklist_distance then
 				Placement_Position = nil
 				break
 			end	
@@ -874,10 +914,21 @@ function Seek_Placeable_Position()
 	
 	
 	if not Placement_Position then
-		Current_Tracking_Node = Selected_Folder:FindFirstChild(tostring(tonumber(Current_Tracking_Node.Name)-1))
+		
+		local old_name = tonumber(Current_Tracking_Node.Name)
+		
+		Current_Tracking_Node = nil
+		
+		while not Current_Tracking_Node do
+			
+			old_name = old_name - 1
+			Current_Tracking_Node = Selected_Folder:FindFirstChild(tostring(old_name))
+			task.wait()
+		end
 		
 		
-		return Seek_Placeable_Position() --Recursive?
+		
+		Placement_Position = Seek_Placeable_Position() --Recursive?
 	end
 	
 	
@@ -934,6 +985,7 @@ local function Initialize_Available_Unit()
 		plr.CharacterAdded:Wait()
 	end
 	
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - (Config["Node Distance From Spawner"] or 0)))
 	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
 		if not MatchResultPage.Visible then
 			return
@@ -978,6 +1030,8 @@ local function Initialize_Available_Unit()
 			end
 		end
 	end]]
+	
+	--Connections.general.Toolbar_Visibility = Toolbar:GetPropertyChangedSignal("Visible")
 	Events.core.OnGameStarted:Fire()
 	
 	if #Queues > 1 then
@@ -997,14 +1051,22 @@ end
 function How_Much_Are_You_Interested_In_This(base_score: number, asking_about: ai_interest, options_data, topic_multiplier: boolean)
 	
 	local multiplier = 1
+	local value = Preset.AI[AI_Config["AI Preset"]][asking_about]
 	
 	if options_data then
 		if Events.comps.IsCompSatisfied:Invoke(options_data) then --Massively lower interest if already satisfied comp
 			multiplier = 0.01
+			
+			
 		end
 	end
 	
-	return base_score * Preset.AI[AI_Config["AI Preset"]][asking_about] * multiplier * (topic_multiplier or 1)
+	if value < 0 then --Increase if value is negative
+		multiplier = -10
+		topic_multiplier = -10
+	end
+	
+	return base_score * value * multiplier * (topic_multiplier or 1)
 end
 
 function Queues_Checker(current_yen)
@@ -1019,7 +1081,7 @@ function Queues_Checker(current_yen)
 		return
 	end
 
-	if cur_queue_data then
+	--[[if cur_queue_data then
 
 		warn('----------------------')
 		warn(cur_queue_data.yen_goal)
@@ -1040,18 +1102,19 @@ function Queues_Checker(current_yen)
 			end
 		end
 
-		PrintTable(cur_queue_data)
+		PrintTable(Queues)
 
-	end
+	end]]
 	
 	cur_queue_data.action_in_progress = true
 	
 	
 	local recorded_action = cur_queue_data.action_status
 
+	_G.LastAction = recorded_action
 	local sucess, err = Queue_Actions[cur_queue_data.action_status](cur_queue_data)
 	
-	
+	--cur_queue_data.action_in_progress = false
 	
 	if sucess then
 		warn("SUCCESS!")
@@ -1095,7 +1158,7 @@ workspace.ChildAdded:Connect(function(child)
 	States.general.last_placing_unit = child.Name
 	States.general.last_placing_model = child
 	
-	child.Destroying:Once(function()
+	child.Destroying:Once(function(_,parent)
 		States.general.last_placing_model = nil
 	end)
 end)
@@ -1209,3 +1272,25 @@ StarterGui:SetCore("SendNotification", {
 	Text = 'Auto Play Agent Ready';
 	Duration = 3
 })
+
+--TODO: Add upgrade interest function
+_G.Queues = Queues
+
+
+--[[local TabLevel = 0
+local plr = game:GetService("Players").LocalPlayer
+local function PrintTable(Table)
+	for Key,Value in pairs(Table) do
+		if typeof(Value) == "table" then
+			TabLevel = TabLevel + 1
+			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
+			PrintTable(Value)
+			warn(string.rep("    ",TabLevel - 1).."}")
+			TabLevel = TabLevel - 1
+		else
+			warn(string.rep("    ",TabLevel)..Key,Value)
+		end
+	end
+end
+
+PrintTable(_G.Queues)]]
