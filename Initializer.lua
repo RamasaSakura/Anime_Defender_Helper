@@ -98,6 +98,23 @@ task.spawn(function()
 end)
 
 getgenv().key = KEY
+--[[ ถ้าจะแจกหรือขาย ให้เปลี่ยน getgenv().secret_auto_trader เป้น
+
+getgenv().secret_auto_trader = { 
+	webhook_url = `` :: string;
+	application_id = '' :: string;
+	channel_id = '';
+	server_id = ''	
+}
+
+]]
+
+getgenv().secret_auto_trader = { 
+	webhook_url = `https://discord.com/api/webhooks/1276124582910365769/T7VSeP_ySIr73EP_GDYIqIoCvvi7j_7sqng7W4xRu0V24TCjcnF1Imx_jGTg0_BrHCmy` :: string;
+	application_id = '1273970162126819359' :: string;
+	channel_id = '1276124504044867584';
+	server_id = '1273513305608159284'
+}
 getgenv().Configuration = {
 	['Enabled'] = true,
 	['Enabled Challenge'] = false,
