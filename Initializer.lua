@@ -2,6 +2,10 @@ local KEY = "98821636884"
 local Lobby_Id = 17017769292
 local plr = game:GetService("Players").LocalPlayer
 
+local Locations = {
+	Trade_Portal = CFrame.new(95.45,12.349,-322.2563,-0.7972,-0.32521,0.508,-0.264,0.945,0.190,-0.54277,0.0172,-0.839)
+}
+
 if not plr.Character then
 	plr.CharacterAdded:Wait()
 end
