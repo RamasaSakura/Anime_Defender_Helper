@@ -140,7 +140,7 @@ getgenv().Configuration = {
 	},
 	['Placement Distance'] = 9,
 	
-	["Farm Tower Of Eternity Mode"] = true --ฟาร์มหอคอย true คือใช่ false คือไม่
+	["Farm Tower Of Eternity Mode"] = false --ฟาร์มหอคอย true คือใช่ false คือไม่
 };
 
 local function IsInLobbyGame()
