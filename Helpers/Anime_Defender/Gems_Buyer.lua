@@ -192,14 +192,30 @@ local function OnBoothMenuOpened()
 	
 	task.wait(0.5)
 	click_this_gui(Prefab.Button)
-	task.wait(0.25)
+	task.wait(0.75)
+	
+	if _G.IsCaptchaActive:Invoke() then
+		repeat task.wait() until not _G.IsCaptchaActive:Invoke()
+		click_this_gui(Prefab.Button)
+	end
+	
 	local PromptDefault = game:GetService("Players").LocalPlayer.PlayerGui.PromptGui:WaitForChild("PromptDefault") :: Frame
 	
 	local BuyButton = PromptDefault.Holder.Options.Buy
 	
-	while task.wait(0.5) do
+	prefab = 0
+	
+	while task.wait(0.15) or prefab > 0 do
 		if not BoothUI.Visible then
 			break
+		end
+		
+		for _,v in BoothUI.ScrollingFrame:GetChildren() do
+			if v.Name ~= "UnitGridPrefab" then
+				continue
+			end
+
+			prefab += 1
 		end
 		
 		click_this_gui(BuyButton)
