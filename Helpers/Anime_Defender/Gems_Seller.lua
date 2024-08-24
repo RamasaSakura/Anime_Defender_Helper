@@ -355,6 +355,8 @@ while Pairer_Id == 0 do
 	task.wait(0.5)
 end
 
+
+
 while task.wait(0.25) do
 	ProximityPromptService.Enabled = true
 	
