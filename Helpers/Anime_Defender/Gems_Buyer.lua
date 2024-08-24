@@ -194,8 +194,10 @@ local function OnBoothMenuOpened()
 	click_this_gui(Prefab.Button)
 	task.wait(0.75)
 	
-	if _G.IsCaptchaActive:Invoke() then
-		repeat task.wait() until not _G.IsCaptchaActive:Invoke()
+	local Captcha = game:GetService("Players").LocalPlayer.PlayerGui.PAGES.CaptchaPage :: Frame
+	
+	if Captcha.Visible then
+		repeat task.wait() until not Captcha.Visible
 		click_this_gui(Prefab.Button)
 	end
 	
