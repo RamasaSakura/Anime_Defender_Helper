@@ -19,7 +19,7 @@ local path = PathfindingService:CreatePath()
 local Pairer_Id = 0 --If this starting value isn't 0 then it's testing if that happen change this to 0
 local Pairer_Instance = nil :: Player
 
-game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true) --Testing
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) --Testing
 
 local States = {
 	occupied_booth = nil :: Model;
