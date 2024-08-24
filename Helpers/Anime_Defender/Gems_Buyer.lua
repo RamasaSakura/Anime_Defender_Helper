@@ -15,12 +15,14 @@ local plr =Players.LocalPlayer
 local UnitData = require(game:GetService("ReplicatedStorage").Modules.Bins.UnitData)
 local occupied_folder = workspace:WaitForChild("Folder")
 local path = PathfindingService:CreatePath()
-game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true) --Testing
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) --Testing
 
 local States = {
 	pair_occupied_booth = nil :: Model;
 	
 }
+
+local Proceed_Sent = false
 
 local character = plr.Character
 local humanoid = character.Humanoid :: Humanoid
@@ -194,6 +196,8 @@ local function PostStringMessage(Message: string)
 
 end
 
+
+
 local function OnBoothMenuOpened()
 	
 	local prefab = 0
@@ -213,7 +217,7 @@ local function OnBoothMenuOpened()
 	
 	local Prefab = BoothUI.ScrollingFrame.UnitGridPrefab :: Frame
 	
-	task.wait(0.5)
+	task.wait(0.35)
 	click_this_gui(Prefab.Button)
 	task.wait(0.75)
 	
@@ -221,7 +225,17 @@ local function OnBoothMenuOpened()
 	
 	if Captcha.Visible then
 		repeat task.wait() until not Captcha.Visible
-		click_this_gui(Prefab.Button)
+		
+		while task.wait() do
+			OnDestinationReached()
+			
+			if BoothUI.Visible then
+				break
+			end
+			
+		end
+		
+		--click_this_gui(Prefab.Button)
 	end
 	
 	local PromptDefault = game:GetService("Players").LocalPlayer.PlayerGui.PromptGui:WaitForChild("PromptDefault") :: Frame
@@ -246,13 +260,16 @@ local function OnBoothMenuOpened()
 		click_this_gui(BuyButton)
 	end
 	
-	PostStringMessage(`เทรดสำเร็จ ขณะนี้ถืออยู่ ({game:GetService("Players")[`{getgenv().Merge_States.Pair_With}`]:WaitForChild('leaderstats')["💎 Gems"].Value}) เพชร`)
-	local secret = getgenv().secret_auto_trader
-	request({
-		Url = `{secret.main_server}:{secret.main_port}/proceed-queue`;
-		Method = "POST";
-	})
-	
+	if not Proceed_Sent then
+		PostStringMessage(`เทรดสำเร็จ ขณะนี้ถืออยู่ ({game:GetService("Players")[`{getgenv().Merge_States.Pair_With}`]:WaitForChild('leaderstats')["💎 Gems"].Value}) เพชร`)
+		local secret = getgenv().secret_auto_trader
+
+
+		request({
+			Url = `{secret.main_server}:{secret.main_port}/proceed-queue`;
+			Method = "POST";
+		})
+	end
 end
 
 
