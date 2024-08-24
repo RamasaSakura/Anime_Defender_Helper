@@ -164,11 +164,34 @@ if not TrackingBooth then
 	TrackingBooth = PickABooth()
 end
 
-local function IsThisUnitGrid()
-	local PromptGui = game:GetService("Players").LocalPlayer.PlayerGui.PromptGui :: ScreenGui
-	
-	
-	
+local function PostToHTTPS(Input)
+
+	local HS = game:GetService("HttpService")
+
+	local secret = getgenv().secret_auto_trader
+	Input = HS:JSONEncode(Input)
+
+	local response, err = request({
+		Url = secret.webhook_url;
+		Method = "POST";
+		Body = Input;
+		Headers = {
+			['Content-Type'] = 'application/json'
+		}
+	})
+
+end
+
+
+local function PostStringMessage(Message: string)
+	task.spawn(function()
+		PostToHTTPS({
+			content = Message .. ` ({plr.Name}) [ID: {plr.UserId}]`;
+			username = `Gems Trader`;
+
+		})
+	end)
+
 end
 
 local function OnBoothMenuOpened()
@@ -222,6 +245,13 @@ local function OnBoothMenuOpened()
 		
 		click_this_gui(BuyButton)
 	end
+	
+	PostStringMessage(`เทรดสำเร็จ ขณะนี้ถืออยู่ ({game:GetService("Players")[`{getgenv().Merge_States.Pair_With}`]:WaitForChild('leaderstats')["💎 Gems"].Value}) เพชร`)
+	local secret = getgenv().secret_auto_trader
+	request({
+		Url = `{secret.main_server}:{secret.main_port}/proceed-queue`;
+		Method = "POST";
+	})
 	
 end
 
