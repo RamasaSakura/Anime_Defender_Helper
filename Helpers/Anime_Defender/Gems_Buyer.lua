@@ -173,7 +173,20 @@ end
 
 local function OnBoothMenuOpened()
 	
-	repeat task.wait() until #BoothUI.ScrollingFrame:GetChildren() > 0
+	local prefab = 0
+	
+	while prefab <= 0 do
+		
+		for _,v in BoothUI.ScrollingFrame:GetChildren() do
+			if v.Name ~= "UnitGridPrefab" then
+				continue
+			end
+			
+			prefab += 1
+		end
+		
+		task.wait()
+	end
 	
 	local Prefab = BoothUI.ScrollingFrame.UnitGridPrefab :: Frame
 	
