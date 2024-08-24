@@ -145,7 +145,7 @@ function OnDestinationReached()
 			end
 			
 			task.wait(0.25)
-			
+			fireproximityprompt(Prompt)
 			Retry += 1
 			
 			if Retry >= 10 then
