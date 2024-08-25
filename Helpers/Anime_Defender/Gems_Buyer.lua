@@ -300,6 +300,13 @@ local function OnBoothMenuOpened()
 		end
 		
 		for _,v in BoothUI.ScrollingFrame:GetChildren() do
+			
+			if v:IsA("Frame") then
+				if not v.Visible then
+					continue
+				end
+			end
+			
 			if v.Name ~= "UnitGridPrefab" then
 				continue
 			end
