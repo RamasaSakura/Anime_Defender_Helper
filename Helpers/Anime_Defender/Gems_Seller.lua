@@ -63,8 +63,37 @@ local function click_this_gui(to_click: GuiObject)
 
 end
 
+local MoveToFinished = Instance.new("BindableEvent")
+local _STEP_NAME = 'Buyer_Move_Step'
+
+local function MoveTo(Position: Vector3)
+
+	RunService:UnbindFromRenderStep(_STEP_NAME)
+	task.wait()
+
+	local TravelTime = 0.35
+	local TimeSpennt = 0
+
+	local Origin = character:GetPivot()
+	local _,size = character:GetBoundingBox()
+
+	RunService:BindToRenderStep(_STEP_NAME, Enum.RenderPriority.Character.Value,function(dt)
+
+		TimeSpennt += dt
+		local Percent = math.min(TimeSpennt/TravelTime,1)
+
+		character:PivotTo(Origin:Lerp(Position,Percent) * CFrame.new(0,size.Y/2,0))
+
+		if Percent >= 1 then
+			RunService:UnbindFromRenderStep(_STEP_NAME)
+			MoveToFinished:Fire()
+		end
+	end)
+
+end
+
 local function followPath(destination)
-	
+
 	local success, errorMessage = pcall(function()
 		path:ComputeAsync(character.PrimaryPart.Position, destination)
 	end)
@@ -86,18 +115,18 @@ local function followPath(destination)
 
 		-- Detect when movement to next waypoint is complete
 		if not reachedConnection then
-			reachedConnection = humanoid.MoveToFinished:Connect(function(reached)
+			reachedConnection = MoveToFinished.Event:Connect(function(reached)
 				if reached and nextWaypointIndex < #waypoints then
 					-- Increase waypoint index and move to next waypoint
 					nextWaypointIndex += 1
-					humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+					MoveTo(waypoints[nextWaypointIndex].Position)
 				else
 					reachedConnection:Disconnect()
 					blockedConnection:Disconnect()
-					
+
 					reachedConnection = nil
 					blockedConnection = nil
-					
+
 					OnDestinationReached()
 				end
 			end)
@@ -105,7 +134,7 @@ local function followPath(destination)
 
 		-- Initially move to second waypoint (first waypoint is path start; skip it)
 		nextWaypointIndex = 2
-		humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+		MoveTo(waypoints[nextWaypointIndex].Position)
 	else
 		warn("Path not computed!", errorMessage)
 	end
