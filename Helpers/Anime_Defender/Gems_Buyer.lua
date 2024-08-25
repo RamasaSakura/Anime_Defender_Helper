@@ -15,7 +15,7 @@ local plr =Players.LocalPlayer
 local UnitData = require(game:GetService("ReplicatedStorage").Modules.Bins.UnitData)
 local occupied_folder = workspace:WaitForChild("Folder")
 local path = PathfindingService:CreatePath()
-game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) --Testing
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true) --Testing
 
 local States = {
 	pair_occupied_booth = nil :: Model;
