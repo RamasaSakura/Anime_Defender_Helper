@@ -64,7 +64,7 @@ local function click_this_gui(to_click: GuiObject)
 end
 
 local MoveToFinished = Instance.new("BindableEvent")
-local _STEP_NAME = 'Buyer_Move_Step'
+local _STEP_NAME = 'Seller_Move_Step'
 
 local function MoveTo(Position: Vector3)
 
@@ -86,7 +86,7 @@ local function MoveTo(Position: Vector3)
 
 		if Percent >= 1 then
 			RunService:UnbindFromRenderStep(_STEP_NAME)
-			MoveToFinished:Fire()
+			MoveToFinished:Fire(true)
 		end
 	end)
 
