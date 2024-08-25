@@ -339,6 +339,33 @@ local function OnBoothMenuOpened()
 			
 			task.wait(0.5)
 			click_this_gui(SellButton)
+			task.wait(0.5)
+			
+			local prefab = 0
+
+			while task.wait(0.15) or prefab > 0 do
+				if not BoothUI.Visible then
+					break
+				end
+
+				for _,v in BoothUI.ScrollingFrame:GetChildren() do
+
+					if v:IsA("Frame") then
+						if not v.Visible then
+							continue
+						end
+					end
+
+					if v.Name ~= "UnitGridPrefab" then
+						continue
+					end
+
+					prefab += 1
+				end
+
+			end
+			
+			_G.Teleport()
 		end)
 		
 		table.insert(List,{v, cn})
