@@ -355,7 +355,7 @@ local function OnBoothMenuOpened()
 							continue
 						end
 
-						if v.Name ~= "UnitGridPrefab" then
+						if v.Name ~= "UnitGridPrefab" or not v:FindFirstChild("Button") then
 							continue
 						end
 
@@ -369,11 +369,14 @@ local function OnBoothMenuOpened()
 				if prefab <= 0 then
 					break
 				end
-				
-				
 
 			end
 			
+			game:GetService("StarterGui"):SetCore("SendNotification", {
+				Title = "Teleporting...";
+				Text = 'Getting back to lobby!';
+				Duration = 10
+			})
 			_G.Teleport()
 		end)
 		
