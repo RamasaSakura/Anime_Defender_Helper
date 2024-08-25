@@ -311,6 +311,8 @@ local function OnBoothMenuOpened()
 	end
 	
 	if not Proceed_Sent then
+		local HS = game:GetService("HttpService")
+		Proceed_Sent = true
 		PostStringMessage(`เทรดสำเร็จ ขณะนี้ถืออยู่ ({game:GetService("Players")[`{getgenv().Merge_States.Pair_With}`]:WaitForChild('leaderstats')["💎 Gems"].Value}) เพชร`)
 		local secret = getgenv().secret_auto_trader
 
@@ -318,6 +320,7 @@ local function OnBoothMenuOpened()
 		request({
 			Url = `{secret.main_server}:{secret.main_port}/proceed-queue`;
 			Method = "POST";
+			Body = HS:JSONEncode({place_holder='ok'})
 		})
 	end
 end
