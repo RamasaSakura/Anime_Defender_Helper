@@ -73,6 +73,8 @@ local function MoveTo(Position: Vector3)
 	
 	RunService:BindToRenderStep(_STEP_NAME, Enum.RenderPriority.Character.Value,function(dt)
 		
+		dt = math.min(1,dt)
+		
 		TimeSpennt += dt
 		local Percent = math.min(TimeSpennt/TravelTime,1)
 		
