@@ -21,6 +21,8 @@ local Pairer_Instance = nil :: Player
 
 game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) --Testing
 
+
+
 local States = {
 	occupied_booth = nil :: Model;
 	trade_success = false
@@ -340,25 +342,35 @@ local function OnBoothMenuOpened()
 			
 			local prefab = 0
 
-			while task.wait(0.15) or prefab > 0 do
+			while task.wait(0.15) do
 				if not BoothUI.Visible then
 					break
 				end
 
+				prefab = 0
 				for _,v in BoothUI.ScrollingFrame:GetChildren() do
 
 					if v:IsA("Frame") then
 						if not v.Visible then
 							continue
 						end
+
+						if v.Name ~= "UnitGridPrefab" then
+							continue
+						end
+
+						prefab += 1
 					end
 
-					if v.Name ~= "UnitGridPrefab" then
-						continue
-					end
 
-					prefab += 1
 				end
+
+				task.wait(0.35)
+				if prefab <= 0 then
+					break
+				end
+				
+				
 
 			end
 			
