@@ -223,7 +223,7 @@ end
 
 
 local function OnBoothMenuOpened()
-	
+	BoothUI.Visible = true
 	local prefab = 0
 	
 	while prefab <= 0 do
@@ -350,6 +350,22 @@ end
 BoothUI:GetPropertyChangedSignal('Visible'):Connect(function()
 	if BoothUI.Visible then
 		OnBoothMenuOpened()
+		
+	else
+		local prefab = 0
+
+		for _,v in BoothUI.ScrollingFrame:GetChildren() do
+			if v.Name ~= "UnitGridPrefab" then
+				continue
+			end
+
+			prefab += 1
+		end
+		
+		if prefab > 0 then
+			
+			OnBoothMenuOpened()
+		end
 	end
 end)
 
