@@ -38,11 +38,6 @@ local function click_this_gui(to_click: GuiObject)
 	local GuiService = game:GetService("GuiService")
 	local VirtualInputManager = game:GetService("VirtualInputManager")
 
-
-	if not iswindowactive() then
-		repeat task.wait() until iswindowactive()
-	end
-
 	local Inset = GuiService:GetGuiInset()
 
 
