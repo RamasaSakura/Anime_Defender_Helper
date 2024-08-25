@@ -17,6 +17,7 @@ local occupied_folder = workspace:WaitForChild("Folder")
 local path = PathfindingService:CreatePath()
 game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) --Testing
 
+
 local States = {
 	pair_occupied_booth = nil :: Model;
 	
@@ -63,7 +64,7 @@ local function MoveTo(Position: Vector3)
 	RunService:UnbindFromRenderStep(_STEP_NAME)
 	task.wait()
 	
-	local TravelTime = math.min(0.15,(Position - character:GetPivot().Position).Magnitude/120)
+	local TravelTime = math.min(0.25,(Position - character:GetPivot().Position).Magnitude/30)
 	local TimeSpennt = 0
 	
 	local Origin = character:GetPivot()
@@ -300,13 +301,15 @@ local function OnBoothMenuOpened()
 				if not v.Visible then
 					continue
 				end
+				
+				if v.Name ~= "UnitGridPrefab" then
+					continue
+				end
+
+				prefab += 1
 			end
 			
-			if v.Name ~= "UnitGridPrefab" then
-				continue
-			end
-
-			prefab += 1
+			
 		end
 		
 		click_this_gui(BuyButton)
@@ -352,20 +355,24 @@ BoothUI:GetPropertyChangedSignal('Visible'):Connect(function()
 		OnBoothMenuOpened()
 		
 	else
-		local prefab = 0
+		task.wait()
+		RunService:UnbindFromRenderStep("CheckLoop")
+		RunService:BindToRenderStep('CheckLoop',Enum.RenderPriority.Last.Value, function()
+			local prefab = 0
 
-		for _,v in BoothUI.ScrollingFrame:GetChildren() do
-			if v.Name ~= "UnitGridPrefab" then
-				continue
+			for _,v in BoothUI.ScrollingFrame:GetChildren() do
+				if v.Name ~= "UnitGridPrefab" then
+					continue
+				end
+
+				prefab += 1
 			end
 
-			prefab += 1
-		end
-		
-		if prefab > 0 then
-			
-			OnBoothMenuOpened()
-		end
+			if prefab > 0 then
+
+				OnBoothMenuOpened()
+			end
+		end)
 	end
 end)
 
