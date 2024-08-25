@@ -313,6 +313,10 @@ local function OnBoothMenuOpened()
 			
 		end
 		
+		task.wait(0.35)
+		click_this_gui(Prefab.Button)
+		task.wait(0.25)
+		
 		click_this_gui(BuyButton)
 		
 		task.wait(0.75)
