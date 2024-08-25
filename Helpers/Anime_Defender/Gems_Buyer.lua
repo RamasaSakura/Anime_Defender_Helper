@@ -83,7 +83,7 @@ local function MoveTo(Position: Vector3)
 		
 		if Percent >= 1 then
 			RunService:UnbindFromRenderStep(_STEP_NAME)
-			MoveToFinished:Fire()
+			MoveToFinished:Fire(true)
 		end
 	end)
 	
