@@ -296,14 +296,11 @@ local function OnBoothMenuOpened()
 				end
 
 			end
+			
+			local MaxPrice = getgenv().Local_Merge_States.Pairer_Budget
 
-			if HighestRarity <= 3 then
-				game:GetService("StarterGui"):SetCore("SendNotification", {
-					Title = 'เทรดไม่สำเร็จ!';
-					Text = 'ต้องมีตัวเทรดที่ดีกว่านี้';
-					Duration = 20
-				})
-				return
+			if HighestRarity < 4 then
+				MaxPrice = 20000
 			end
 
 			task.wait(0.5)
@@ -335,7 +332,7 @@ local function OnBoothMenuOpened()
 				end
 			end
 			
-			SellTextbox.Text = getgenv().Local_Merge_States.Pairer_Budget or 10000000
+			SellTextbox.Text = MaxPrice or 10000000
 			
 			task.wait(0.5)
 			click_this_gui(SellButton)
