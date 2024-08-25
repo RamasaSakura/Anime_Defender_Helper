@@ -68,7 +68,7 @@ local function MoveTo(Position: Vector3)
 	RunService:UnbindFromRenderStep(_STEP_NAME)
 	task.wait()
 	
-	local TravelTime = 0.35
+	local TravelTime = math.min(0.15,(Position - character:GetPivot().Position).Magnitude/120)
 	local TimeSpennt = 0
 	
 	local Origin = character:GetPivot()
