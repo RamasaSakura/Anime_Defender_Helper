@@ -18,6 +18,7 @@ local path = PathfindingService:CreatePath()
 game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) --Testing
 
 
+
 local States = {
 	pair_occupied_booth = nil :: Model;
 	
@@ -314,6 +315,10 @@ local function OnBoothMenuOpened()
 		end
 		
 		task.wait(0.35)
+		if not Prefab:FindFirstChild("Button") then
+			break
+		end
+		
 		click_this_gui(Prefab.Button)
 		task.wait(0.25)
 		
