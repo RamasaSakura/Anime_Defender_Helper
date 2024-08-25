@@ -15,7 +15,7 @@ local plr =Players.LocalPlayer
 local UnitData = require(game:GetService("ReplicatedStorage").Modules.Bins.UnitData)
 local occupied_folder = workspace:WaitForChild("Folder")
 local path = PathfindingService:CreatePath()
-game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true) --Testing
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) --Testing
 
 local States = {
 	pair_occupied_booth = nil :: Model;
@@ -79,7 +79,7 @@ local function MoveTo(Position: Vector3)
 		TimeSpennt += dt
 		local Percent = math.min(TimeSpennt/TravelTime,1)
 		
-		character:PivotTo(Origin:Lerp(Position,Percent) * CFrame.new(0,size.Y/2,0))
+		character:PivotTo(Origin:Lerp(CFrame.new(Position),Percent) * CFrame.new(0,size.Y/2,0))
 		
 		if Percent >= 1 then
 			RunService:UnbindFromRenderStep(_STEP_NAME)
