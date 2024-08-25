@@ -228,7 +228,7 @@ local function OnBoothMenuOpened()
 	local prefab = 0
 	
 	while prefab <= 0 do
-		
+		prefab = 0
 		for _,v in BoothUI.ScrollingFrame:GetChildren() do
 			if v.Name ~= "UnitGridPrefab" then
 				continue
@@ -295,6 +295,7 @@ local function OnBoothMenuOpened()
 			break
 		end
 		
+		prefab = 0
 		for _,v in BoothUI.ScrollingFrame:GetChildren() do
 			
 			if v:IsA("Frame") then
@@ -313,6 +314,8 @@ local function OnBoothMenuOpened()
 		end
 		
 		click_this_gui(BuyButton)
+		
+		task.wait(0.75)
 	end
 	
 	if not Proceed_Sent then
