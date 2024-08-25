@@ -290,7 +290,7 @@ local function OnBoothMenuOpened()
 	
 	prefab = 0
 	
-	while task.wait(0.15) or prefab > 0 do
+	while task.wait(0.15) do
 		if not BoothUI.Visible then
 			break
 		end
@@ -316,6 +316,10 @@ local function OnBoothMenuOpened()
 		click_this_gui(BuyButton)
 		
 		task.wait(0.75)
+		
+		if prefab <= 0 then
+			break
+		end
 	end
 	
 	if not Proceed_Sent then
