@@ -14,7 +14,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 local Config = {
 	["Node Distance From Spawner"] = 10;
-	["Minimum Distance From Node"] = 3
+	["Minimum Distance From Node"] = 4
 };
 
 local AI_Config = {
@@ -140,7 +140,14 @@ local StarterGui = game:GetService("StarterGui")
 local plr = game:GetService("Players").LocalPlayer
 local GuiService = game:GetService("GuiService")
 
+local Player_Index = 0
 
+for i,v in game:GetService("Players"):GetPlayers() do
+	if v == plr then
+		Player_Index = i
+		break
+	end
+end
 
 
 local Random = Random.new()
@@ -175,7 +182,7 @@ local Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: 
 
 
 local Total_Nodes = #Selected_Folder:GetChildren()
-local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - (Config["Node Distance From Spawner"] or 0)))
+local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - ((Config["Node Distance From Spawner"] or 0)+Player_Index)))
 
 local Current_Tracking_Node = Starting_Node :: BasePart
 
@@ -1029,7 +1036,7 @@ local function Initialize_Available_Unit()
 		plr.CharacterAdded:Wait()
 	end
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - (Config["Node Distance From Spawner"] or 0)))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - ((Config["Node Distance From Spawner"] or 0)+Player_Index)))
 	Current_Tracking_Node = Starting_Node
 	
 	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
@@ -1334,5 +1341,21 @@ StarterGui:SetCore("SendNotification", {
 --TODO: Add upgrade interest function
 _G.Queues = Queues
 
+
+--[[local TabLevel = 0
+local plr = game:GetService("Players").LocalPlayer
+local function PrintTable(Table)
+	for Key,Value in pairs(Table) do
+		if typeof(Value) == "table" then
+			TabLevel = TabLevel + 1
+			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
+			PrintTable(Value)
+			warn(string.rep("    ",TabLevel - 1).."}")
+			TabLevel = TabLevel - 1
+		else
+			warn(string.rep("    ",TabLevel)..Key,Value)
+		end
+	end
+end
 
 PrintTable(_G.Queues)]]
