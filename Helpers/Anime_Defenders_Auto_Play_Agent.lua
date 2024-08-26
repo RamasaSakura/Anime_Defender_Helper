@@ -419,7 +419,7 @@ function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
 
 
 	else--Value are not any lower get in between current index
-		table.insert(Queues,option_2_index,option_1)
+		table.insert(Queues,option_1)
 		
 		return
 	end
@@ -490,6 +490,11 @@ local Comp_Handler = {
 			local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][data.cur_upgrade_level+1]
 
 			--data.cur_upgrade_level += 1
+			
+			if not next_level_data then
+				table.remove(Queues,1)
+				return
+			end
 
 			if not next_level_data and data.cur_upgrade_level <= 1 then
 				StarterGui:SetCore('SendNotification', {
@@ -734,6 +739,12 @@ function Upgrade_This_Unit(queue_data)
 		--table.remove(Queues,table.find(Queues,queue_data))
 
 		local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][queue_data.cur_upgrade_level+1]
+		
+		if not next_level_data then
+			table.remove(Queues,1)
+			return
+		end
+		
 		queue_data.cur_upgrade_level += 1
 
 		queue_data.yen_goal = next_level_data.Cost
