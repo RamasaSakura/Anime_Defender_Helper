@@ -4,6 +4,7 @@ local plr = game:GetService("Players").LocalPlayer
 local Target = workspace:FindFirstChild(MoveToTarget) :: Model
 local Humanoid = plr.Character.Humanoid :: Humanoid
 
+local StarterGui = game:GetService("StarterGui")
 local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -20,7 +21,7 @@ local blockedConnection
 
 local function followPath(destination)
 	-- Compute the path
-	
+
 	StarterGui:SetCore("SendNotification", {
 		Title = "รอสักครู่";
 		Text = "กำลังหาทางไปหาตำแหน่งผู้เล่น";
@@ -77,6 +78,6 @@ if not Target then
 	return
 end
 
-
-followPath(Target.PrimaryPart.Position)
-
+while task.wait(1) do
+	followPath(Target.PrimaryPart.Position)
+end
