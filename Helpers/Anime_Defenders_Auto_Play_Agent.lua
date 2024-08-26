@@ -182,7 +182,7 @@ local Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: 
 
 
 local Total_Nodes = #Selected_Folder:GetChildren()
-local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - ((Config["Node Distance From Spawner"] or 0)+Player_Index)))
+local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 
 local Current_Tracking_Node = Starting_Node :: BasePart
 
@@ -1056,7 +1056,7 @@ local function Initialize_Available_Unit()
 		plr.CharacterAdded:Wait()
 	end
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - ((Config["Node Distance From Spawner"] or 0)+Player_Index)))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 	Current_Tracking_Node = Starting_Node
 	
 	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
