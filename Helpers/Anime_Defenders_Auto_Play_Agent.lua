@@ -14,7 +14,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 local Config = {
 	["Node Distance From Spawner"] = 10;
-	["Minimum Distance From Node"] = 4
+	["Minimum Distance From Node"] = 3
 };
 
 local AI_Config = {
@@ -781,9 +781,12 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 
 			if Retry >= 15 then
-				Toolbar.Visible = true
+				VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.Q,false,game)
+				VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.Q,false,game)
 
 				table.insert(blacklist_location,Position)
+				
+				task.wait(0.5)
 				Place_Unit_Here(queue_data,Seek_Placeable_Position())
 				return
 			end
@@ -818,7 +821,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 		Retry = 0
 		local _,size = model:GetBoundingBox()
 
-		while States.general.last_placing_model do
+		while model.Parent do
 
 			if Retry >= 10 then
 
