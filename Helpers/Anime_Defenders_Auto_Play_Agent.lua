@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play v 1.0.2")
+warn("Auto Play v 1.0.3")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -765,7 +765,7 @@ function Upgrade_This_Unit(queue_data)
 
 		--table.remove(Queues,table.find(Queues,queue_data))
 
-		local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][queue_data.cur_upgrade_level+1]
+		local next_level_data = Upgrade_Data[queue_data.unit_name][queue_data.cur_upgrade_level+1]
 		
 		if not next_level_data then
 			table.remove(Queues,1)
