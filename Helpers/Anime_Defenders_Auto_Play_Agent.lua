@@ -494,7 +494,7 @@ local Comp_Handler = {
 
 			--data.unit_name = States.general.last_placing_unit
 
-			local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][data.cur_upgrade_level+1]
+			local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level + 1]
 
 			--data.cur_upgrade_level += 1
 			
@@ -1383,22 +1383,3 @@ StarterGui:SetCore("SendNotification", {
 
 --TODO: Add upgrade interest function
 _G.Queues = Queues
-
-
---[[local TabLevel = 0
-local plr = game:GetService("Players").LocalPlayer
-local function PrintTable(Table)
-	for Key,Value in pairs(Table) do
-		if typeof(Value) == "table" then
-			TabLevel = TabLevel + 1
-			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
-			PrintTable(Value)
-			warn(string.rep("    ",TabLevel - 1).."}")
-			TabLevel = TabLevel - 1
-		else
-			warn(string.rep("    ",TabLevel)..Key,Value)
-		end
-	end
-end
-
-PrintTable(_G.Queues)]]
