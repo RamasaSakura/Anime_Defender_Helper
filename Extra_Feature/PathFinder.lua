@@ -25,23 +25,40 @@ local nextWaypointIndex
 local reachedConnection
 local blockedConnection
 
-local function followPath(destination)
-	-- Compute the path
-	
-	if reachedConnection then
-		reachedConnection:Disconnect()
-	end
-	
-	if blockedConnection then
-		blockedConnection:Disconnect()
-		Humanoid:Move(Vector3.zero)
-	end
 
-	StarterGui:SetCore("SendNotification", {
-		Title = "รอสักครู่";
-		Text = "กำลังหาทางไปหาตำแหน่งผู้เล่น";
-		Duration = 3
-	})
+local MoveToFinished = Instance.new("BindableEvent")
+local _STEP_NAME = 'Buyer_Move_Step'
+
+local function MoveTo(Position: Vector3)
+
+	RunService:UnbindFromRenderStep(_STEP_NAME)
+	task.wait()
+
+	local TravelTime = math.min(0.25,(Position - character:GetPivot().Position).Magnitude/16)
+	local TimeSpennt = 0
+
+	local Origin = character:GetPivot()
+	local _,size = character:GetBoundingBox()
+
+	RunService:BindToRenderStep(_STEP_NAME, Enum.RenderPriority.Character.Value,function(dt)
+
+		dt = math.min(0.25,dt)
+
+		TimeSpennt += dt
+		local Percent = math.min(TimeSpennt/TravelTime,1)
+
+		character:PivotTo(Origin:Lerp(CFrame.new(Position),Percent) * CFrame.new(0,size.Y/2,0))
+
+		if Percent >= 1 then
+			RunService:UnbindFromRenderStep(_STEP_NAME)
+			MoveToFinished:Fire(true)
+		end
+	end)
+
+end
+
+local function followPath(destination)
+
 	local success, errorMessage = pcall(function()
 		path:ComputeAsync(character.PrimaryPart.Position, destination)
 	end)
@@ -63,36 +80,30 @@ local function followPath(destination)
 
 		-- Detect when movement to next waypoint is complete
 		if not reachedConnection then
-			reachedConnection = humanoid.MoveToFinished:Connect(function(reached)
+			reachedConnection = MoveToFinished.Event:Connect(function(reached)
 				if reached and nextWaypointIndex < #waypoints then
 					-- Increase waypoint index and move to next waypoint
 					nextWaypointIndex += 1
-					humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+					MoveTo(waypoints[nextWaypointIndex].Position)
 				else
 					reachedConnection:Disconnect()
 					blockedConnection:Disconnect()
+
+					reachedConnection = nil
+					blockedConnection = nil
+
+					--OnDestinationReached()
 				end
 			end)
 		end
 
 		-- Initially move to second waypoint (first waypoint is path start; skip it)
 		nextWaypointIndex = 2
-		humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+		MoveTo(waypoints[nextWaypointIndex].Position)
 	else
 		warn("Path not computed!", errorMessage)
 	end
 end
 
 
-if not Target then
-	StarterGui:SetCore("SendNotification", {
-		Title = "หาผู้เล่นไม่เจอ";
-		Text = "เดินอัตโนมัตไม่ได้";
-		Duration = 3
-	})
-	return
-end
-
-while task.wait(10) do
-	followPath(Target.PrimaryPart.Position)
-end
+followPath(Target.PrimaryPart.Position)
