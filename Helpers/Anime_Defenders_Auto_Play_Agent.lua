@@ -139,7 +139,7 @@ local TweenService = game:GetService("TweenService")
 local StarterGui = game:GetService("StarterGui")
 local plr = game:GetService("Players").LocalPlayer
 local GuiService = game:GetService("GuiService")
-
+local GameInitialized = false
 local Player_Index = 0
 
 for i,v in game:GetService("Players"):GetPlayers() do
@@ -1062,6 +1062,10 @@ end
 
 local function Initialize_Available_Unit()
 
+	if GameInitialized then
+		return
+	end
+
 	if not game:IsLoaded() then
 		game.Loaded:Wait()
 	end
@@ -1131,7 +1135,7 @@ local function Initialize_Available_Unit()
 		Text = 'เริ่มทำการ เล่นอัตโนมัติ'
 	})
 
-
+	GameInitialized = true
 end
 
 
@@ -1276,7 +1280,7 @@ ClearCommand.Parent = TextChatService
 function Clear_For_Next_Stage()
 
 
-
+	GameInitialized = true
 	table.clear(Queues)
 	table.clear(Available_Units_Info)
 	table.clear(blacklist_location)
