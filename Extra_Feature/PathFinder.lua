@@ -1,5 +1,5 @@
 --Path Finder
-local MoveToTarget = "" --ชื่อของตัวที่จะเดินไปหา
+local MoveToTarget = getgenv().Configuration.Following or "" --ชื่อของตัวที่จะเดินไปหา
 local plr = game:GetService("Players").LocalPlayer
 local Target = workspace:FindFirstChild(MoveToTarget) :: Model
 local Humanoid = plr.Character.Humanoid :: Humanoid
