@@ -894,7 +894,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 			end
 
 			--Toolbar.Visible = false
-			task.wait(0.75)
+			task.wait(0.25)
 
 			local offset = {
 				x = 0 + (Retry * Random:NextNumber(-5,5));
@@ -904,7 +904,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 			--print(`Distance: {(Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.X) - Position).Magnitude}`)
 
 			Camera.CFrame = Goal
-			if Retry <= 2 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 2) then
+			if Retry <= 4 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 2) then
 				--Test area to see if it placeable
 				VirtualInputManager:SendMouseMoveEvent(vector.X+offset.x,vector.Y+offset.y,game)
 				model:PivotTo(CFrame.new(Position + Vector3.new(0,size.Y/2,0)))
