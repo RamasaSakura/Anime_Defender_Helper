@@ -256,7 +256,7 @@ local ProblemsSolver = {
 			[2] = 0
 		}
 
-		local cloned_option_1 = (typeof(option_1) == 'table' and table.clone(option_1)) or nil
+		--[[local cloned_option_1 = (typeof(option_1) == 'table' and table.clone(option_1)) or nil
 		local cloned_option_2 = (typeof(option_2) == 'table' and table.clone(option_2)) or nil
 
 		local function Ask_Interest(topic: askable_topic, asking: ai_interest)
@@ -269,7 +269,7 @@ local ProblemsSolver = {
 			Ask_Interest('cur_upgrade_level','Level')
 			Ask_Interest('rarity_level','Rarity')
 			Ask_Interest('slot_order','Slot')
-		end
+		end]]
 
 		Adjust_Queues(option_1,option_2,option_score, "queue_placement")
 
@@ -282,7 +282,7 @@ local ProblemsSolver = {
 			[2] = 0
 		}
 
-		local cloned_option_1 = (typeof(option_1) == 'table' and table.clone(option_1)) or nil
+		--[[local cloned_option_1 = (typeof(option_1) == 'table' and table.clone(option_1)) or nil
 		local cloned_option_2 = (typeof(option_2) == 'table' and table.clone(option_2)) or nil
 
 		local function Ask_Interest(topic: askable_topic, asking: ai_interest)
@@ -295,7 +295,7 @@ local ProblemsSolver = {
 			Ask_Interest('cur_upgrade_level','Level')
 			Ask_Interest('rarity_level','Rarity')
 			Ask_Interest('slot_order','Slot')
-		end
+		end]]
 
 		Adjust_Queues(option_1,option_2,option_score, "queue_upgrade")
 
@@ -426,9 +426,6 @@ function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
 
 
 	table.insert(Queues,option_1)
-
-
-
 end
 
 function Ask_AI_Decision(option_1, option_2, problem: problems,...)
@@ -439,13 +436,25 @@ function GetPrioritized_Level(full_data) --Lower number mean higher priority
 
 end
 
+function deepCopy(original)
+	local copy = {}
+	for key, value in pairs(original) do
+		if type(value) == 'table' then
+			copy[key] = deepCopy(value)
+		else
+			copy[key] = value
+		end
+	end
+	return copy
+end
+
 local Comp_Handler = {
 	["Spread Upgrade"] = function(data)
 
 		local function AddUpgradeQueue(Added_Data,placed_position)
 
 			local data = Added_Data
-			local new = {}
+			--[[local new = {}
 
 			for i,v in data do
 				if typeof(v) == 'table' then
@@ -461,7 +470,9 @@ local Comp_Handler = {
 
 			for i,v in data.statics do
 				new.statics[i] = v
-			end
+			end]]
+			
+			local new = deepCopy(data)
 
 			table.insert(data.placed_info,new)
 
@@ -538,17 +549,7 @@ local Comp_Handler = {
 			for i,v in option_score do
 				for _ = 1, AI_Config["Comp Settings"].Unit_Placement[i] or 2 do
 					
-					function deepCopy(original)
-						local copy = {}
-						for key, value in pairs(original) do
-							if type(value) == 'table' then
-								copy[key] = deepCopy(value)
-							else
-								copy[key] = value
-							end
-						end
-						return copy
-					end
+					
 
 					
 					Ask_AI_Decision(deepCopy(v[2]),Queues[1], "queue_placement")
@@ -745,7 +746,7 @@ function Upgrade_This_Unit(queue_data)
 		if Retry >= 10 then
 			return true
 		end
-		table.remove(Queues,table.find(Queues,queue_data))
+		table.remove(Queues,1)
 
 		Events.comps.OnUnitUpgraded:Fire(queue_data, Position)
 
@@ -885,7 +886,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 		Toolbar.Visible = true
 
-		table.remove(Queues,table.find(Queues,queue_data))
+		table.remove(Queues,1)
 		
 		
 
@@ -1189,6 +1190,12 @@ workspace.ChildAdded:Connect(function(child)
 
 	States.general.last_placing_unit = child.Name
 	States.general.last_placing_model = child
+	
+	child.AncestryChanged:Connect(function(_,parent)
+		if not parent then
+			States.general.last_placing_model = nil
+		end
+	end)
 
 	child.Destroying:Once(function(_,parent)
 		States.general.last_placing_model = nil
