@@ -781,7 +781,8 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 	local cur_unit_button = queue_data.statics.frame :: Frame
 
-	local Tween = TweenService:Create(Camera,TweenInfo.new(0.01), {CFrame = CFrame.new(Position+ Vector3.new(0,8,0), Position)})
+	local Goal = CFrame.new(Position+ Vector3.new(0,8,0), Position)
+	local Tween = TweenService:Create(Camera,TweenInfo.new(0.01), {CFrame = Goal})
 
 
 	Tween.Completed:Once(function()
@@ -862,6 +863,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 			--print(`Distance: {(Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.X) - Position).Magnitude}`)
 
+			Camera.CFrame = Goal
 			if Retry <= 2 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 2) then
 				--Test area to see if it placeable
 				VirtualInputManager:SendMouseMoveEvent(vector.X+offset.x,vector.Y+offset.y,game)
