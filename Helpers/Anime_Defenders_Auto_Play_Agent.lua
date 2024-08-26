@@ -14,7 +14,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 local Config = {
 	["Node Distance From Spawner"] = 10;
-	["Minimum Distance From Node"] = 3
+	["Minimum Distance From Node"] = 4
 };
 
 local AI_Config = {
