@@ -34,7 +34,7 @@ local function MoveTo(Position: Vector3)
 	RunService:UnbindFromRenderStep(_STEP_NAME)
 	task.wait()
 
-	local TravelTime = math.min(0.25,(Position - character:GetPivot().Position).Magnitude/16)
+	local TravelTime = math.min(2,(Position - character:GetPivot().Position).Magnitude/60)
 	local TimeSpennt = 0
 
 	local Origin = character:GetPivot()
@@ -114,6 +114,6 @@ local function followPath(destination)
 end
 
 
-while task.wait(6) do
-	followPath(Target.PrimaryPart.Position + Target.PrimaryPart.CFrame.LookVector)
+while task.wait(4) do
+	MoveTo(Target.PrimaryPart.Position + Target.PrimaryPart.CFrame.LookVector)
 end
