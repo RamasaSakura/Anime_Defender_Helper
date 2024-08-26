@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Agent v 1")
+
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -809,7 +809,7 @@ end
 
 function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 	
-	if Counter >= 10 then
+	if Counter and Counter >= 10 then
 		--Drop this operation if failed too many time (Placed capped unit?)
 		
 		table.remove(Queues,1)
