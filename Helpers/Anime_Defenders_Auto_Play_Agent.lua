@@ -711,7 +711,7 @@ function Upgrade_This_Unit(queue_data)
 			
 			local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
 			
-			if IsInvalidToPlace(Result) then
+			if IsInvalidToPlace(Result) or IsAPlacingUnit(Result.Instance.Parent) then
 				SameTarget += 1
 			end
 			
