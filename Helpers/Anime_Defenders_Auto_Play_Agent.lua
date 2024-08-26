@@ -14,7 +14,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 local Config = {
 	["Node Distance From Spawner"] = 10;
-	["Minimum Distance From Node"] = 4
+	["Minimum Distance From Node"] = 3
 };
 
 local AI_Config = {
@@ -1277,12 +1277,6 @@ function Clear_For_Next_Stage()
 		task.wait(0.15)
 	end
 	
-	for _,v in Connections do
-		for _,v2 in v do
-			v2:Disconnect()
-		end
-	end
-
 	Queues_Checker(yen_value.Value)
 
 	Toolbar.Visible = true
