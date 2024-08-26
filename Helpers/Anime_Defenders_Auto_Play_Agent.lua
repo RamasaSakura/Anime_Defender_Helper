@@ -677,9 +677,8 @@ function Upgrade_This_Unit(queue_data)
 
 
 	Tween.Completed:Once(function()
-		click_this_gui(cur_unit_button)
 		task.wait(0.15)
-
+		--click_this_gui(cur_unit_button)
 		task.wait(0.25)
 
 
@@ -688,9 +687,20 @@ function Upgrade_This_Unit(queue_data)
 
 		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
 		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+		
+		local SameTarget = 0 --Increased when found unit (possibly not your?)
 
 		while not UnitBillboard.Enabled do
 			task.wait(0.25)
+			
+			if SameTarget >= 10 then
+				--Ditch this thing (Probably goes out of sync?)
+				table.remove(Queues,1)
+				Toolbar.Visible = true
+				ZoomOut()
+				
+				return
+			end
 
 			vector= Camera:WorldToViewportPoint(Position)
 			screenPoint = Vector2.new(vector.X, vector.Y)
@@ -698,6 +708,17 @@ function Upgrade_This_Unit(queue_data)
 
 			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
 			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+			
+			local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
+			
+			if IsInvalidToPlace(Result) then
+				SameTarget += 1
+			end
+			
+		end
+		
+		if SameTarget >= 10 then
+			return
 		end
 
 		Upgrade_Button.Parent = Guis_Folder
@@ -917,6 +938,10 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 end
 
+function IsInvalidToPlace(Result : RaycastResult)
+	return not Result or Result.Instance.Parent.Name == "Path" or IsAPlacingUnit(Result.Instance.Parent)
+end
+
 function Seek_Placeable_Position()
 
 	if not Current_Tracking_Node then
@@ -938,7 +963,7 @@ function Seek_Placeable_Position()
 		local Result = workspace:Raycast(Current_Tracking_Node.Position + (dir * Config["Minimum Distance From Node"]) + (Vector3.yAxis * 8), Vector3.yAxis * -20,Raycast)
 
 
-		if not Result or Result.Instance.Parent.Name == "Path" or IsAPlacingUnit(Result.Instance.Parent) then
+		if IsInvalidToPlace(Result) then
 			if Result then
 				table.insert(blacklist_location, Result.Position)
 
