@@ -1077,6 +1077,13 @@ local function Initialize_Available_Unit()
 	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 	Current_Tracking_Node = Starting_Node
 	
+	for _,v in Connections do
+		for _,v2 in v do
+			v2:Disconnect()
+		end
+	end
+	task.wait()
+	
 	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
 		if not MatchResultPage.Visible then
 			return
