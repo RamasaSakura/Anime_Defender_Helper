@@ -1269,6 +1269,18 @@ function Clear_For_Next_Stage()
 
 		task.wait(0.15)
 	end
+	
+	for _,v in Connections do
+		for _,v2 in v do
+			v2:Disconnect()
+		end
+	end
+
+	for _,v in Events do
+		for _,v2 in v do
+			v2:Destroy()
+		end
+	end
 
 	Queues_Checker(yen_value.Value)
 
