@@ -1030,6 +1030,8 @@ local function Initialize_Available_Unit()
 	end
 
 	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - (Config["Node Distance From Spawner"] or 0)))
+	Current_Tracking_Node = Starting_Node
+	
 	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
 		if not MatchResultPage.Visible then
 			return
