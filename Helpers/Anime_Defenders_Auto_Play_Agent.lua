@@ -781,8 +781,8 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 
 			if Retry >= 15 then
-				VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.Q,false,game)
-				VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.Q,false,game)
+				VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
+				VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
 
 				table.insert(blacklist_location,Position)
 				
