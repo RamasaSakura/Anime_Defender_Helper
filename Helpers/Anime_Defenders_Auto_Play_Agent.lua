@@ -807,7 +807,14 @@ function ZoomOut()
 	TweenService:Create(Camera,TweenInfo.new(1,Enum.EasingStyle.Sine), {CFrame = CFrame.new(Camera.CFrame.Position + (Vector3.yAxis * 30))*Camera.CFrame.Rotation}):Play()
 end
 
-function Place_Unit_Here(queue_data, Position: Vector3)
+function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
+	
+	if Counter >= 10 then
+		--Drop this operation if failed too many time (Placed capped unit?)
+		
+		table.remove(Queues,1)
+		return
+	end
 
 	Position = Position or Seek_Placeable_Position()
 
@@ -846,7 +853,14 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 				table.insert(blacklist_location,Position)
 				
 				task.wait(0.5)
-				Place_Unit_Here(queue_data,Seek_Placeable_Position())
+				if Counter then
+					Counter += 1
+				end
+				
+				Place_Unit_Here(queue_data,Seek_Placeable_Position(), Counter or 0)
+				
+				
+				
 				return
 			end
 
