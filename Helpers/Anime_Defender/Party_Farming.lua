@@ -53,8 +53,5 @@ end
 if IsInLobbyGame() then
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/RamasaSakura/Anime_Defender_Helper/main/Extra_Feature/PathFinder.lua'))()	
 else
-	--[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
-loadstring(game:HttpGet("https://raw.githubusercontent.com/siradaniy/Script_HSz/main/HSz_Main.lua"))()
+
 end
