@@ -809,7 +809,7 @@ end
 
 function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 	
-	if Counter and Counter >= 10 then
+	if Counter and Counter >= 5 then
 		--Drop this operation if failed too many time (Placed capped unit?)
 		
 		table.remove(Queues,1)
