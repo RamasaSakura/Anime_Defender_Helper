@@ -420,17 +420,13 @@ function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
 
 	else--Value are not any lower get in between current index
 		table.insert(Queues,option_2_index,option_1)
+		
+		return
 	end
 
 
-	if option_1.action_status == 'upgrade' then --Move to last if upgrade
-		local option_1_index = table.find(Queues,option_1)
+	table.insert(Queues,option_1)
 
-		if option_1_index then
-			table.remove(Queues,option_1_index)
-			table.insert(Queues,option_1)
-		end
-	end
 
 
 end
@@ -540,14 +536,28 @@ local Comp_Handler = {
 			end)
 
 			for i,v in option_score do
-				for i = 1, AI_Config["Comp Settings"].Unit_Placement[i] or 1 do
-					Ask_AI_Decision(v[2],Queues[1], "queue_placement")
+				for _ = 1, AI_Config["Comp Settings"].Unit_Placement[i] or 2 do
+					
+					function deepCopy(original)
+						local copy = {}
+						for key, value in pairs(original) do
+							if type(value) == 'table' then
+								copy[key] = deepCopy(value)
+							else
+								copy[key] = value
+							end
+						end
+						return copy
+					end
+
+					
+					Ask_AI_Decision(deepCopy(v[2]),Queues[1], "queue_placement")
 				end
 			end
 		end)
 
 		Events.comps.IsCompSatisfied.OnInvoke = function(data)
-			--[[if not Upgrade_Data[data.unit_name] then --No upgrade data?
+			if not Upgrade_Data[data.unit_name] then --No upgrade data?
 				return false
 			end
 			
@@ -557,8 +567,8 @@ local Comp_Handler = {
 				return true
 			end
 			
-			return data.cur_upgrade_level > 2 * States.comps.cycle]]
-			return false --Test
+			return data.cur_upgrade_level > 2 * States.comps.cycle
+			--return false --Test
 		end
 	end,
 }
