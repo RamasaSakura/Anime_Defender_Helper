@@ -36,11 +36,13 @@ local PlaceID = Lobby_Id --Teleport to main game instead of subplace (Prevent so
 
 ---------------------------------------
 
-
+if not getgenv().Helpers then
+	getgenv().Helpers = {}
+end	
 
 getgenv().Configuration = {
 
-	['Following'] = '' --Leader name
+	['Following'] = getgenv().Helpers.Following or '' --Leader name
 
 };
 
