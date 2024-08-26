@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Agent v 1.0.0.1")
+
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -856,7 +856,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 				if Counter then
 					Counter += 1
 				end
-				
+
 				Place_Unit_Here(queue_data,Seek_Placeable_Position(), Counter or 0)
 				
 				
@@ -901,7 +901,11 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 				table.insert(blacklist_location, Position)
 				Toolbar.Visible = true
 				task.wait()
-				Place_Unit_Here(queue_data,Seek_Placeable_Position())
+				if Counter then
+					Counter += 1
+				end
+
+				Place_Unit_Here(queue_data,Seek_Placeable_Position(), Counter or 0)
 				return
 			end
 
