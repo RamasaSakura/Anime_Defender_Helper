@@ -93,6 +93,6 @@ if not Target then
 	return
 end
 
-while task.wait(5) do
+while task.wait(10) do
 	followPath(Target.PrimaryPart.Position)
 end
