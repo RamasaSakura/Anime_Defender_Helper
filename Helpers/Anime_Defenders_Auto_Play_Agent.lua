@@ -677,7 +677,6 @@ function Upgrade_This_Unit(queue_data)
 
 
 	Tween.Completed:Once(function()
-		task.wait(0.15)
 		--click_this_gui(cur_unit_button)
 		task.wait(0.25)
 
@@ -691,7 +690,7 @@ function Upgrade_This_Unit(queue_data)
 		local SameTarget = 0 --Increased when found unit (possibly not your?)
 
 		while not UnitBillboard.Enabled do
-			task.wait(0.25)
+			task.wait(0.35)
 			
 			if SameTarget >= 10 then
 				--Ditch this thing (Probably goes out of sync?)
@@ -709,12 +708,12 @@ function Upgrade_This_Unit(queue_data)
 			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
 			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
 			
-			local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
+			--[[local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
 			
 			if IsInvalidToPlace(Result) or IsAPlacingUnit(Result.Instance.Parent) then
-				SameTarget += 1
-			end
-			
+				
+			end]]
+			SameTarget += 1
 		end
 		
 		if SameTarget >= 10 then
@@ -833,7 +832,6 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 		while not States.general.last_placing_model do
 
-
 			if Retry >= 15 then
 				
 				if game:GetService("UserInputService").TouchEnabled then
@@ -926,9 +924,6 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 		Toolbar.Visible = true
 
 		table.remove(Queues,1)
-		
-		
-
 
 		queue_data.action_in_progress = false
 		Events.comps.OnUnitPlaced:Fire(queue_data, Position)
@@ -1203,8 +1198,6 @@ function Queues_Checker(current_yen)
 		print(err)
 		error(err)
 	end
-
-
 
 end
 
