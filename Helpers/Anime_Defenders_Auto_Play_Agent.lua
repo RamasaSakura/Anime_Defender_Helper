@@ -866,7 +866,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 			end
 
 			--Toolbar.Visible = false
-			task.wait(0.35)
+			task.wait(0.75)
 
 			local offset = {
 				x = 0 + (Retry * Random:NextNumber(-5,5));
@@ -1276,12 +1276,6 @@ function Clear_For_Next_Stage()
 		end
 	end
 
-	for _,v in Events do
-		for _,v2 in v do
-			v2:Destroy()
-		end
-	end
-
 	Queues_Checker(yen_value.Value)
 
 	Toolbar.Visible = true
@@ -1340,21 +1334,5 @@ StarterGui:SetCore("SendNotification", {
 --TODO: Add upgrade interest function
 _G.Queues = Queues
 
-
---[[local TabLevel = 0
-local plr = game:GetService("Players").LocalPlayer
-local function PrintTable(Table)
-	for Key,Value in pairs(Table) do
-		if typeof(Value) == "table" then
-			TabLevel = TabLevel + 1
-			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
-			PrintTable(Value)
-			warn(string.rep("    ",TabLevel - 1).."}")
-			TabLevel = TabLevel - 1
-		else
-			warn(string.rep("    ",TabLevel)..Key,Value)
-		end
-	end
-end
 
 PrintTable(_G.Queues)]]
