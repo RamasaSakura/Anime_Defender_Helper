@@ -682,7 +682,10 @@ function Upgrade_This_Unit(queue_data)
 		local Retry = 0
 
 		while task.wait(0.25) do
-			if #Price_Label.Text:gsub(",",""):match("%d+") > 0 or Retry >= 20 then
+			
+			local Result = Price_Label.Text:gsub(",",""):match("%d+")
+			
+			if not Result or #Result > 0 or Retry >= 20 then
 				break
 			end
 
@@ -781,8 +784,15 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 
 			if Retry >= 15 then
-				VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
-				VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
+				
+				if game:GetService("UserInputService").TouchEnabled then
+					click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
+				else
+					VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
+					VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
+				end
+				
+				
 
 				table.insert(blacklist_location,Position)
 				
