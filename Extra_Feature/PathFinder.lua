@@ -27,6 +27,15 @@ local blockedConnection
 
 local function followPath(destination)
 	-- Compute the path
+	
+	if reachedConnection then
+		reachedConnection:Disconnect()
+	end
+	
+	if blockedConnection then
+		blockedConnection:Disconnect()
+		Humanoid:Move(Vector3.zero)
+	end
 
 	StarterGui:SetCore("SendNotification", {
 		Title = "รอสักครู่";
