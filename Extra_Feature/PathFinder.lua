@@ -58,6 +58,14 @@ local function MoveTo(Position: Vector3)
 end
 
 local function followPath(destination)
+	
+	if reachedConnection then
+		reachedConnection:Disconnect()
+	end
+	
+	if blockedConnection then
+		reachedConnection:Disconnect()
+	end
 
 	local success, errorMessage = pcall(function()
 		path:ComputeAsync(character.PrimaryPart.Position, destination)
@@ -106,4 +114,6 @@ local function followPath(destination)
 end
 
 
-followPath(Target.PrimaryPart.Position)
+while task.wait(6) do
+	followPath(Target.PrimaryPart.Position + Target.PrimaryPart.CFrame.LookVector)
+end
