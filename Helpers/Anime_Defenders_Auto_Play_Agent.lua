@@ -717,7 +717,7 @@ function Upgrade_This_Unit(queue_data)
 
 		Upgrade_Button.Parent = HolderButtons
 
-		table.remove(Queues,table.find(Queues,queue_data))
+		--table.remove(Queues,table.find(Queues,queue_data))
 
 		local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][queue_data.cur_upgrade_level+1]
 		queue_data.cur_upgrade_level += 1
@@ -732,7 +732,7 @@ function Upgrade_This_Unit(queue_data)
 		if Retry >= 10 then
 			return true
 		end
-
+		table.remove(Queues,table.find(Queues,queue_data))
 
 		Events.comps.OnUnitUpgraded:Fire(queue_data, Position)
 
@@ -768,7 +768,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 	local cur_unit_button = queue_data.statics.frame :: Frame
 
-	local Tween = TweenService:Create(Camera,TweenInfo.new(0.1), {CFrame = CFrame.new(Position+ Vector3.new(0,8,0), Position)})
+	local Tween = TweenService:Create(Camera,TweenInfo.new(0.01), {CFrame = CFrame.new(Position+ Vector3.new(0,8,0), Position)})
 
 
 	Tween.Completed:Once(function()
@@ -824,6 +824,7 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 
 				table.insert(blacklist_location, Position)
 				Toolbar.Visible = true
+				task.wait()
 				Place_Unit_Here(queue_data,Seek_Placeable_Position())
 				return
 			end
@@ -851,10 +852,17 @@ function Place_Unit_Here(queue_data, Position: Vector3)
 		end
 
 		ZoomOut()
+		task.wait(0.5)
+		
+		if Retry >= 10 then
+			return
+		end
 
 		Toolbar.Visible = true
 
 		table.remove(Queues,table.find(Queues,queue_data))
+		
+		
 
 
 		queue_data.action_in_progress = false
