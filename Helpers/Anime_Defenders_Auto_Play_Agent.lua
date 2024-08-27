@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.3.7")
+warn("Auto Play Pre-Build v 1.0.3.8")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1266,6 +1266,10 @@ function Clear_For_Next_Stage()
 
 	task.wait(0.15)
 
+	local vp_size = workspace.CurrentCamera.ViewportSize
+
+	VirtualInputManager:SendMouseButtonEvent(vp_size.X/2,vp_size.Y/2,0,true,game,0)
+	VirtualInputManager:SendMouseButtonEvent(vp_size.X/2,vp_size.Y/2,0,false,game,0)
 	local PlayNext = game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Main.Options.PlayNextButton :: TextButton
 
 	if PlayNext.Visible then
