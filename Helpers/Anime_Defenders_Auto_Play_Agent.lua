@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.3.9")
+warn("Auto Play Pre-Build v 1.0.4.0")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -779,6 +779,15 @@ function ZoomOut()
 	TweenService:Create(Camera,TweenInfo.new(1,Enum.EasingStyle.Sine), {CFrame = CFrame.new(Camera.CFrame.Position + (Vector3.yAxis * 30))*Camera.CFrame.Rotation}):Play()
 end
 
+function CancelPlacement()
+	if game:GetService("UserInputService").TouchEnabled then
+		click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
+	else
+		VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
+		VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
+	end
+end
+
 function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 
@@ -809,13 +818,8 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 			if Retry >= 15 then
 
-				if game:GetService("UserInputService").TouchEnabled then
-					click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
-				else
-					VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
-					VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
-				end
-
+				
+					CancelPlacement()
 
 
 				table.insert(blacklist_location,Position)
@@ -862,9 +866,10 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 		Retry = 0
 		local _,size = model:GetBoundingBox()
 
+		local ValidFailed = 0
 		while model.Parent do
 
-			if Retry >= 10 then
+			if Retry >= 15 then
 
 				table.insert(blacklist_location, Position)
 				Toolbar.Visible = true
@@ -878,7 +883,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			end
 
 			--Toolbar.Visible = false
-			task.wait(Random:NextNumber(0.15,0.35))
+			task.wait(Random:NextNumber(0.1,0.2))
 
 			local offset = {
 				x = 0 + (Retry * Random:NextNumber(-5,5));
@@ -895,6 +900,21 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			else
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
+				
+				local Result = workspace:Raycast(Camera.CFrame.Position, Vector3.yAxis * -50,Raycast)
+				
+				if not IsInvalidToPlace(Result) then
+					ValidFailed += 1
+					
+					if ValidFailed >= 3 then
+						Toolbar.Visible = true
+						CancelPlacement()
+						ZoomOut()
+						
+						table.remove(Queues,1)
+						return
+					end
+				end
 			end
 
 			Retry += 1
