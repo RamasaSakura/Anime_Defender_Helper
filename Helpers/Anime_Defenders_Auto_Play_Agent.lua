@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.1")
+warn("Auto Play Pre-Build v 1.0.4.2")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -495,8 +495,10 @@ local Comp_Handler = {
 				return a[1] > b[1]
 			end)
 
+			table.clear(Queues)
+
 			for i,v in option_score do
-				for _ = 1, AI_Config["Comp Settings"].Unit_Placement[i] or 2 do
+				for _ = 1, math.min(2,AI_Config["Comp Settings"].Unit_Placement[i] or 2) do
 					Ask_AI_Decision(deepCopy(v[2]),Queues[1], "queue_placement")
 				end
 			end
