@@ -694,7 +694,13 @@ function Upgrade_This_Unit(queue_data)
 			
 			if SameTarget >= 10 then
 				--Ditch this thing (Probably goes out of sync?)
-				table.remove(Queues,1)
+				local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
+				
+				if IsInvalidToPlace(Result) then
+					table.remove(Queues,1)
+				end
+				
+				
 				Toolbar.Visible = true
 				ZoomOut()
 				
