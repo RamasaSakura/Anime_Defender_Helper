@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build")
+warn("Auto Play Pre-Build-0.0.0.1")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -369,69 +369,6 @@ function Adjust_Rank()
 end
 
 function Adjust_Queues(option_1,option_2,score_sheet, last_problem: problems)
-	
-
-	if not option_1 and not option_2 then
-		return
-	end
-
-	if (option_1 == option_2) then
-		return
-	end
-
-	if not option_2 and option_1 then
-		table.insert(Queues,option_1)
-
-		return
-	end
-
-	if not option_1 and option_2 then
-		--table.insert(Queues,option_2)
-
-		return
-	end
-
-	--[[table.sort(score_sheet, function(a,b)
-		return a > b
-	end)]]
-
-	local option_2_index = table.find(Queues, option_2)
-
-	if not option_2_index then
-		return
-	end
-
-	--[[if last_problem == 'queue_upgrade' then --Upgrade queue take lower priority
-		score_sheet[1] /= (2 * (option_1.cur_upgrade_level))
-	end]]
-
-	if score_sheet[1] > score_sheet[2] then
-
-		--[[local exist_index = table.find(Queues,option_1)
-		
-		if exist_index then
-			table.remove(Queues,exist_index)
-			option_2_index = table.find(Queues, option_2)
-		end
-		
-		if not option_2_index then
-			return
-		end]]
-
-		table.insert(Queues,option_2_index+1,option_1)
-
-		if last_problem then
-			--ProblemsSolver[last_problem](option_1,table.find(Queues,option_1)+1) --Recursive to check if this value also lower than older queues
-		end
-
-
-	else--Value are not any lower get in between current index
-		table.insert(Queues,option_1)
-		
-		return
-	end
-
-
 	table.insert(Queues,option_1)
 end
 
@@ -478,7 +415,7 @@ local Comp_Handler = {
 			for i,v in data.statics do
 				new.statics[i] = v
 			end]]
-			
+
 			local new = deepCopy(data)
 
 			table.insert(data.placed_info,new)
@@ -494,24 +431,16 @@ local Comp_Handler = {
 
 			--data.unit_name = States.general.last_placing_unit
 
-			local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][data.cur_upgrade_level+1]
+			local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level]
 
 			--data.cur_upgrade_level += 1
-			
+
 			if not next_level_data then
 				table.remove(Queues,1)
 				return
 			end
 
-			if not next_level_data and data.cur_upgrade_level <= 1 then
-				StarterGui:SetCore('SendNotification', {
-					Title = 'มีการ Error เกิดขึ้น';
-					Text = 'ไม่พบข้อมูลตัวละครที่พึ่งวางไป';
-					Duration = 5
-				})
-				return
-			end
-
+			
 			data.yen_goal = next_level_data.Cost
 			data.action_status = 'upgrade'
 			Ask_AI_Decision(data,Queues[1], "queue_upgrade")
@@ -560,10 +489,10 @@ local Comp_Handler = {
 
 			for i,v in option_score do
 				for _ = 1, AI_Config["Comp Settings"].Unit_Placement[i] or 2 do
-					
-					
 
-					
+
+
+
 					Ask_AI_Decision(deepCopy(v[2]),Queues[1], "queue_placement")
 				end
 			end
@@ -573,13 +502,13 @@ local Comp_Handler = {
 			if not Upgrade_Data[data.unit_name] then --No upgrade data?
 				return false
 			end
-			
+
 			local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level]
-			
+
 			if not next_level_data then --Maxed out?
 				return true
 			end
-			
+
 			return data.cur_upgrade_level > 2 * States.comps.cycle
 			--return false --Test
 		end
@@ -686,18 +615,18 @@ function Upgrade_This_Unit(queue_data)
 
 		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
 		VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
-		
+
 		local SameTarget = 0 --Increased when found unit (possibly not your?)
 
 		while not UnitBillboard.Enabled do
 			task.wait(0.35)
-			
+
 			if SameTarget >= 10 then
 				--Ditch this thing (Probably goes out of sync?)
 				table.remove(Queues,1)
 				Toolbar.Visible = true
 				ZoomOut()
-				
+
 				return
 			end
 
@@ -707,7 +636,7 @@ function Upgrade_This_Unit(queue_data)
 
 			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
 			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
-			
+
 			--[[local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
 			
 			if IsInvalidToPlace(Result) or IsAPlacingUnit(Result.Instance.Parent) then
@@ -715,7 +644,7 @@ function Upgrade_This_Unit(queue_data)
 			end]]
 			SameTarget += 1
 		end
-		
+
 		if SameTarget >= 10 then
 			return
 		end
@@ -725,9 +654,9 @@ function Upgrade_This_Unit(queue_data)
 		local Retry = 0
 
 		while task.wait(0.25) do
-			
+
 			local Result = Price_Label.Text:gsub(",",""):match("%d+")
-			
+
 			if not Result or #Result > 0 or Retry >= 20 then
 				break
 			end
@@ -766,12 +695,12 @@ function Upgrade_This_Unit(queue_data)
 		--table.remove(Queues,table.find(Queues,queue_data))
 
 		local next_level_data = Upgrade_Data[queue_data.unit_name][queue_data.cur_upgrade_level+1]
-		
+
 		if not next_level_data then
 			table.remove(Queues,1)
 			return
 		end
-		
+
 		queue_data.cur_upgrade_level += 1
 
 		queue_data.yen_goal = next_level_data.Cost
@@ -808,10 +737,10 @@ function ZoomOut()
 end
 
 function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
-	
+
 	if Counter and Counter >= 5 then
 		--Drop this operation if failed too many time (Placed capped unit?)
-		
+
 		table.remove(Queues,1)
 		return
 	end
@@ -840,27 +769,27 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 		while not States.general.last_placing_model do
 
 			if Retry >= 15 then
-				
+
 				if game:GetService("UserInputService").TouchEnabled then
 					click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
 				else
 					VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
 					VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
 				end
-				
-				
+
+
 
 				table.insert(blacklist_location,Position)
-				
+
 				task.wait(0.5)
 				if Counter then
 					Counter += 1
 				end
 
 				Place_Unit_Here(queue_data,Seek_Placeable_Position(), Counter or 0)
-				
-				
-				
+
+
+
 				return
 			end
 
@@ -934,7 +863,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 		ZoomOut()
 		task.wait(0.5)
-		
+
 		if Retry >= 10 then
 			return
 		end
@@ -1080,16 +1009,16 @@ local function Initialize_Available_Unit()
 
 	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 	Current_Tracking_Node = Starting_Node
-	
+
 	for _,v in Connections do
 		for _,v2 in v do
 			v2:Disconnect()
 		end
 	end
 	task.wait()
-	
+
 	Connections.general.yen_tracking = yen_value.Changed:Connect(Queues_Checker)
-	
+
 	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
 		if MatchResultPage.Visible then
 			return
@@ -1138,10 +1067,7 @@ local function Initialize_Available_Unit()
 	--Connections.general.Toolbar_Visibility = Toolbar:GetPropertyChangedSignal("Visible")
 	Events.core.OnGameStarted:Fire()
 
-	if #Queues > 1 then
-		Adjust_Queues(Queues[1],Queues[2],{0,0})
-	end
-
+	
 	task.wait(3)
 	StarterGui:SetCore("SendNotification", {
 		Title = 'ระบบเริ่มทำงานแล้ว';
@@ -1259,7 +1185,7 @@ workspace.ChildAdded:Connect(function(child)
 
 	States.general.last_placing_unit = child.Name
 	States.general.last_placing_model = child
-	
+
 	child.AncestryChanged:Connect(function(_,parent)
 		if not parent then
 			States.general.last_placing_model = nil
@@ -1325,7 +1251,7 @@ function Clear_For_Next_Stage()
 
 		task.wait(0.15)
 	end
-	
+
 	Queues_Checker(yen_value.Value)
 
 	Toolbar.Visible = true
@@ -1382,23 +1308,4 @@ StarterGui:SetCore("SendNotification", {
 })
 
 --TODO: Add upgrade interest function
-_G.Queues = Queues
-
-
---[[local TabLevel = 0
-local plr = game:GetService("Players").LocalPlayer
-local function PrintTable(Table)
-	for Key,Value in pairs(Table) do
-		if typeof(Value) == "table" then
-			TabLevel = TabLevel + 1
-			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
-			PrintTable(Value)
-			warn(string.rep("    ",TabLevel - 1).."}")
-			TabLevel = TabLevel - 1
-		else
-			warn(string.rep("    ",TabLevel)..Key,Value)
-		end
-	end
-end
-
-PrintTable(_G.Queues)]]
+--_G.Queues = Queues
