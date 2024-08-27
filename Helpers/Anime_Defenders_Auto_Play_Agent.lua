@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.2")
+warn("Auto Play Pre-Build v 1.0.4.3")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -783,9 +783,17 @@ end
 
 function CancelPlacement()
 	if game:GetService("UserInputService").TouchEnabled and game:GetService("Players").LocalPlayer.PlayerGui.HUD:FindFirstChild("MobileButtonHolder") then
-		
 	
-		click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
+		while task.wait(0.5) do
+			
+			if game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.Visible then
+				click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
+			end
+			
+			
+		end	
+	
+		
 	else
 		VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
 		VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
@@ -905,12 +913,12 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
 				
-				local Result = workspace:Raycast(Camera.CFrame.Position, Vector3.yAxis * -50,Raycast)
+				local Result = workspace:Raycast(plr:GetMouse().Target.Position, Vector3.yAxis * -50,Raycast)
 				
 				if not IsInvalidToPlace(Result) then
 					ValidFailed += 1
 					
-					if ValidFailed >= 3 then
+					if ValidFailed >= 10 then
 						Toolbar.Visible = true
 						CancelPlacement()
 						ZoomOut()
