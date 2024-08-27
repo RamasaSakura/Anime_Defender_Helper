@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.0.7")
+warn("Auto Play Pre-Build v 1.0.0.8")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -678,7 +678,11 @@ function Upgrade_This_Unit(queue_data)
 
 		local old_price = tonumber(Price_Label.Text:gsub(",",""):match("%d+"))
 
-		while old_price == tonumber(Price_Label.Text:gsub(",",""):match("%d+")) do
+		while not old_price or old_price == tonumber(Price_Label.Text:gsub(",",""):match("%d+")) do
+
+			if not old_price then
+				old_price = tonumber(Price_Label.Text:gsub(",",""):match("%d+"))
+			end
 
 			task.wait(0.25)
 			click_this_gui(Upgrade_Button)
