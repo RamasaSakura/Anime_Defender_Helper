@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play v 1.0.0.6")
+warn("Auto Play Pre-Build")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -455,9 +455,12 @@ function deepCopy(original)
 	return copy
 end
 
-function AddUpgradeQueue(Added_Data,placed_position)
+local Comp_Handler = {
+	["Spread Upgrade"] = function(data)
 
-	local data = Added_Data
+		local function AddUpgradeQueue(Added_Data,placed_position)
+
+			local data = Added_Data
 			--[[local new = {}
 
 			for i,v in data do
@@ -475,49 +478,44 @@ function AddUpgradeQueue(Added_Data,placed_position)
 			for i,v in data.statics do
 				new.statics[i] = v
 			end]]
+			
+			local new = deepCopy(data)
 
-	local new = deepCopy(data)
+			table.insert(data.placed_info,new)
 
-	table.insert(data.placed_info,new)
-
-	local data = new
-	local index = #data.placed_info
+			local data = new
+			local index = #data.placed_info
 
 
 
-	if not data.position and placed_position then
-		data.position = placed_position
-	end
+			if not data.position and placed_position then
+				data.position = placed_position
+			end
 
-	--data.unit_name = States.general.last_placing_unit
+			--data.unit_name = States.general.last_placing_unit
 
-	local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level + 1]
+			local next_level_data = States.general.last_placing_unit and Upgrade_Data[States.general.last_placing_unit][data.cur_upgrade_level+1]
 
-	--data.cur_upgrade_level += 1
+			--data.cur_upgrade_level += 1
+			
+			if not next_level_data then
+				table.remove(Queues,1)
+				return
+			end
 
-	if not next_level_data then
-		--table.remove(Queues,1)
-		return
-	end
+			if not next_level_data and data.cur_upgrade_level <= 1 then
+				StarterGui:SetCore('SendNotification', {
+					Title = 'มีการ Error เกิดขึ้น';
+					Text = 'ไม่พบข้อมูลตัวละครที่พึ่งวางไป';
+					Duration = 5
+				})
+				return
+			end
 
-	if not next_level_data and data.cur_upgrade_level <= 1 then
-		StarterGui:SetCore('SendNotification', {
-			Title = 'มีการ Error เกิดขึ้น';
-			Text = 'ไม่พบข้อมูลตัวละครที่พึ่งวางไป';
-			Duration = 5
-		})
-		return
-	end
-
-	data.yen_goal = next_level_data.Cost
-	data.action_status = 'upgrade'
-	Ask_AI_Decision(data,Queues[1], "queue_upgrade")
-end
-
-local Comp_Handler = {
-	["Spread Upgrade"] = function(data)
-
-		
+			data.yen_goal = next_level_data.Cost
+			data.action_status = 'upgrade'
+			Ask_AI_Decision(data,Queues[1], "queue_upgrade")
+		end
 
 		Connections.comps.OnUnitPlaced = Events.comps.OnUnitPlaced.Event:Connect(function(data, placed_position)
 			AddUpgradeQueue(data,placed_position)
@@ -696,13 +694,7 @@ function Upgrade_This_Unit(queue_data)
 			
 			if SameTarget >= 10 then
 				--Ditch this thing (Probably goes out of sync?)
-				local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
-				
-				if IsInvalidToPlace(Result) and not IsAPlacingUnit(Result.Instance.Parent) then
-					AddUpgradeQueue(queue_data,queue_data.position)
-				end
-				
-				
+				table.remove(Queues,1)
 				Toolbar.Visible = true
 				ZoomOut()
 				
@@ -736,9 +728,8 @@ function Upgrade_This_Unit(queue_data)
 			
 			local Result = Price_Label.Text:gsub(",",""):match("%d+")
 			
-			if not Result or #Result <= 0 or Retry >= 20 then
-				Retry += 1
-				continue
+			if not Result or #Result > 0 or Retry >= 20 then
+				break
 			end
 
 			Retry += 1
@@ -758,7 +749,7 @@ function Upgrade_This_Unit(queue_data)
 
 		local old_price = tonumber(Price_Label.Text:gsub(",",""):match("%d+"))
 
-		while old_price and old_price == tonumber(Price_Label.Text:gsub(",",""):match("%d+")) do
+		while old_price == tonumber(Price_Label.Text:gsub(",",""):match("%d+")) do
 
 			task.wait(0.25)
 			click_this_gui(Upgrade_Button)
@@ -774,31 +765,26 @@ function Upgrade_This_Unit(queue_data)
 
 		--table.remove(Queues,table.find(Queues,queue_data))
 
+		local next_level_data = Upgrade_Data[queue_data.unit_name][queue_data.cur_upgrade_level+1]
 		
-		queue_data.cur_upgrade_level += 1
-		
-		Toolbar.Visible = true
-		
-		ZoomOut()
-		
-		local next_level_data = Upgrade_Data[queue_data.unit_name][queue_data.cur_upgrade_level]
-
 		if not next_level_data then
-			table.remove(Queues,table.find(Queues,queue_data))
-			AddUpgradeQueue(queue_data,queue_data.position)
+			table.remove(Queues,1)
 			return
 		end
-
+		
+		queue_data.cur_upgrade_level += 1
 
 		queue_data.yen_goal = next_level_data.Cost
+
+		ZoomOut()
+
+		Toolbar.Visible = true
 
 		queue_data.action_in_progress = false
 		if Retry >= 10 then
 			return true
 		end
-		
-		table.remove(Queues,table.find(Queues,queue_data))
-		--AddUpgradeQueue(queue_data,queue_data.position)
+		table.remove(Queues,1)
 
 		Events.comps.OnUnitUpgraded:Fire(queue_data, Position)
 
@@ -826,7 +812,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 	if Counter and Counter >= 5 then
 		--Drop this operation if failed too many time (Placed capped unit?)
 		
-		table.remove(Queues,table.find(Queues,queue_data))
+		table.remove(Queues,1)
 		return
 	end
 
@@ -955,7 +941,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 		Toolbar.Visible = true
 
-		table.remove(Queues,table.find(Queues,queue_data))
+		table.remove(Queues,1)
 
 		queue_data.action_in_progress = false
 		Events.comps.OnUnitPlaced:Fire(queue_data, Position)
@@ -1193,7 +1179,7 @@ function Queues_Checker(current_yen)
 	if not cur_queue_data or not cur_queue_data.yen_goal or (cur_queue_data.yen_goal > current_yen) or cur_queue_data.action_in_progress then
 
 		if cur_queue_data and not cur_queue_data.yen_goal then
-			table.remove(Queues,table.find(Queues,cur_queue_data)) --Remove from queue
+			table.remove(Queues,1) --Remove from queue
 		end
 
 		return
@@ -1398,3 +1384,21 @@ StarterGui:SetCore("SendNotification", {
 --TODO: Add upgrade interest function
 _G.Queues = Queues
 
+
+--[[local TabLevel = 0
+local plr = game:GetService("Players").LocalPlayer
+local function PrintTable(Table)
+	for Key,Value in pairs(Table) do
+		if typeof(Value) == "table" then
+			TabLevel = TabLevel + 1
+			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
+			PrintTable(Value)
+			warn(string.rep("    ",TabLevel - 1).."}")
+			TabLevel = TabLevel - 1
+		else
+			warn(string.rep("    ",TabLevel)..Key,Value)
+		end
+	end
+end
+
+PrintTable(_G.Queues)]]
