@@ -696,7 +696,7 @@ function Upgrade_This_Unit(queue_data)
 				--Ditch this thing (Probably goes out of sync?)
 				local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
 				
-				if IsInvalidToPlace(Result) then
+				if IsInvalidToPlace(Result) and not IsAPlacingUnit(Result.Instance.Parent) then
 					table.remove(Queues,1)
 				end
 				
