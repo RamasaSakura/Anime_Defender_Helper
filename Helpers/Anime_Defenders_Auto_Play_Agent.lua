@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.2")
+warn("Auto Play Pre-Build")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1166,6 +1166,11 @@ function How_Much_Are_You_Interested_In_This(base_score: number, asking_about: a
 end
 
 function Queues_Checker(current_yen)
+	
+	if not Checked then
+		return
+	end
+	
 	local cur_queue_data = Queues[1]
 
 	if not cur_queue_data or not cur_queue_data.yen_goal or (cur_queue_data.yen_goal > current_yen) or cur_queue_data.action_in_progress then
