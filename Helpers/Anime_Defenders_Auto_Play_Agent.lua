@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.8")
+warn("Auto Play Pre-Build v 1.0.4.9")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1389,8 +1389,10 @@ UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
 
 	
 	task.delay(6,function()
+		
+		local Gradient = Upgrade_Button.UIGradient :: UIGradient
 
-		if Update_Id ~= Cached_id or Upgrade_Button.Parent == HolderButtons then
+		if Update_Id ~= Cached_id and Color_Similarity(Gradient.Color.Keypoints[1],Color3.new(1,1,1)) >= 0.2 then
 			return
 		end
 
@@ -1410,30 +1412,3 @@ UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
 	end)
 end)
 
---[[task.spawn(function()
-	while task.wait(6) do
-		if Upgrade_Button.Visible and UnitBillboard.Enabled then
-			
-		end
-	end
-end)]]
-
-warn('----------------------')
-
-local TabLevel = 0
-local plr = game:GetService("Players").LocalPlayer
-local function PrintTable(Table)
-	for Key,Value in pairs(Table) do
-		if typeof(Value) == "table" then
-			TabLevel = TabLevel + 1
-			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
-			PrintTable(Value)
-			warn(string.rep("    ",TabLevel - 1).."}")
-			TabLevel = TabLevel - 1
-		else
-			warn(string.rep("    ",TabLevel)..Key,Value)
-		end
-	end
-end
-
-PrintTable(require(game:GetService("ReplicatedStorage").PlayerInfoCache))
