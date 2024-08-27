@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build-0.0.0.1")
+warn("Auto Play Pre-Build-1.0.0.2")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -392,12 +392,9 @@ function deepCopy(original)
 	return copy
 end
 
-local Comp_Handler = {
-	["Spread Upgrade"] = function(data)
+function AddUpgradeQueue(Added_Data,placed_position)
 
-		local function AddUpgradeQueue(Added_Data,placed_position)
-
-			local data = Added_Data
+	local data = Added_Data
 			--[[local new = {}
 
 			for i,v in data do
@@ -416,35 +413,39 @@ local Comp_Handler = {
 				new.statics[i] = v
 			end]]
 
-			local new = deepCopy(data)
+	local new = deepCopy(data)
 
-			table.insert(data.placed_info,new)
+	table.insert(data.placed_info,new)
 
-			local data = new
-			local index = #data.placed_info
+	local data = new
+	local index = #data.placed_info
 
 
 
-			if not data.position and placed_position then
-				data.position = placed_position
-			end
+	if not data.position and placed_position then
+		data.position = placed_position
+	end
 
-			--data.unit_name = States.general.last_placing_unit
+	--data.unit_name = States.general.last_placing_unit
 
-			local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level]
+	local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level]
 
-			--data.cur_upgrade_level += 1
+	--data.cur_upgrade_level += 1
 
-			if not next_level_data then
-				table.remove(Queues,1)
-				return
-			end
+	if not next_level_data then
+		table.remove(Queues,1)
+		return
+	end
 
-			
-			data.yen_goal = next_level_data.Cost
-			data.action_status = 'upgrade'
-			Ask_AI_Decision(data,Queues[1], "queue_upgrade")
-		end
+
+	data.yen_goal = next_level_data.Cost
+	data.action_status = 'upgrade'
+	Ask_AI_Decision(data,Queues[1], "queue_upgrade")
+end
+
+local Comp_Handler = {
+	["Spread Upgrade"] = function(data)
+
 
 		Connections.comps.OnUnitPlaced = Events.comps.OnUnitPlaced.Event:Connect(function(data, placed_position)
 			AddUpgradeQueue(data,placed_position)
@@ -489,10 +490,6 @@ local Comp_Handler = {
 
 			for i,v in option_score do
 				for _ = 1, AI_Config["Comp Settings"].Unit_Placement[i] or 2 do
-
-
-
-
 					Ask_AI_Decision(deepCopy(v[2]),Queues[1], "queue_placement")
 				end
 			end
@@ -624,6 +621,7 @@ function Upgrade_This_Unit(queue_data)
 			if SameTarget >= 10 then
 				--Ditch this thing (Probably goes out of sync?)
 				table.remove(Queues,1)
+				AddUpgradeQueue(queue_data,queue_data.position)
 				Toolbar.Visible = true
 				ZoomOut()
 
@@ -698,6 +696,7 @@ function Upgrade_This_Unit(queue_data)
 
 		if not next_level_data then
 			table.remove(Queues,1)
+			AddUpgradeQueue(queue_data,queue_data.position)
 			return
 		end
 
