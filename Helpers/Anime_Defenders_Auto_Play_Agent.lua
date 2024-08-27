@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.3.8")
+warn("Auto Play Pre-Build v 1.0.3.9")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1353,23 +1353,43 @@ StarterGui:SetCore("SendNotification", {
 --TODO: Add upgrade interest function
 _G.Queues = Queues
 
+local Update_Id = 0
+
+UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
+	
+	Update_Id += 1
+	local Cached_id = Update_Id
+	
+	if not UnitBillboard.Enabled then
+		return
+	end
+	
+	task.delay(6,function()
+
+		if Update_Id ~= Cached_id then
+			return
+		end
+
+		local Price_Label = Upgrade_Button:WaitForChild('TextLabel') :: TextLabel
+		if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
+
+
+			Toolbar.Visible = true
+			ZoomOut()
+
+			Upgrade_Button.Parent = HolderButtons
+			AddUpgradeQueue(Queues[1],Queues[1].position)
+
+			task.wait()
+			table.remove(Queues,1)
+		end
+	end)
+end)
+
 task.spawn(function()
 	while task.wait(6) do
 		if Upgrade_Button.Visible and UnitBillboard.Enabled then
 			
-			local Price_Label = Upgrade_Button:WaitForChild('TextLabel') :: TextLabel
-			if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
-				
-
-				Toolbar.Visible = true
-				ZoomOut()
-
-				Upgrade_Button.Parent = HolderButtons
-				AddUpgradeQueue(Queues[1],Queues[1].position)
-				
-				task.wait()
-				table.remove(Queues,1)
-			end
 		end
 	end
 end)
