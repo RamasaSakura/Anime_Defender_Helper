@@ -11,9 +11,9 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.3.6")
+warn("Auto Play Pre-Build v 1.0.3.7")
 local Config = {
-	["Node Distance From Spawner"] = 10;
+	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
 };
 
@@ -144,7 +144,7 @@ local Player_Index = 0
 
 for i,v in game:GetService("Players"):GetPlayers() do
 	if v == plr then
-		Player_Index = i - 1
+		Player_Index = i
 		break
 	end
 end
@@ -184,7 +184,7 @@ local Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: 
 
 
 local Total_Nodes = #Selected_Folder:GetChildren()
-local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
+local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*5)))))
 
 local Current_Tracking_Node = Starting_Node :: BasePart
 
@@ -1046,7 +1046,7 @@ local function Initialize_Available_Unit()
 		plr.CharacterAdded:Wait()
 	end
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*5)))))
 	Current_Tracking_Node = Starting_Node
 
 	for _,v in Connections do
