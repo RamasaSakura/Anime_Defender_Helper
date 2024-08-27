@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-
+warn("Auto Play v 1.0.4")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -182,7 +182,7 @@ local Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: 
 
 
 local Total_Nodes = #Selected_Folder:GetChildren()
-local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*5)))))
+local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 
 local Current_Tracking_Node = Starting_Node :: BasePart
 
@@ -455,12 +455,9 @@ function deepCopy(original)
 	return copy
 end
 
-local Comp_Handler = {
-	["Spread Upgrade"] = function(data)
+function AddUpgradeQueue(Added_Data,placed_position)
 
-		local function AddUpgradeQueue(Added_Data,placed_position)
-
-			local data = Added_Data
+	local data = Added_Data
 			--[[local new = {}
 
 			for i,v in data do
@@ -478,44 +475,49 @@ local Comp_Handler = {
 			for i,v in data.statics do
 				new.statics[i] = v
 			end]]
-			
-			local new = deepCopy(data)
 
-			table.insert(data.placed_info,new)
+	local new = deepCopy(data)
 
-			local data = new
-			local index = #data.placed_info
+	table.insert(data.placed_info,new)
+
+	local data = new
+	local index = #data.placed_info
 
 
 
-			if not data.position and placed_position then
-				data.position = placed_position
-			end
+	if not data.position and placed_position then
+		data.position = placed_position
+	end
 
-			--data.unit_name = States.general.last_placing_unit
+	--data.unit_name = States.general.last_placing_unit
 
-			local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level + 1]
+	local next_level_data = Upgrade_Data[data.unit_name][data.cur_upgrade_level + 1]
 
-			--data.cur_upgrade_level += 1
-			
-			if not next_level_data then
-				table.remove(Queues,1)
-				return
-			end
+	--data.cur_upgrade_level += 1
 
-			if not next_level_data and data.cur_upgrade_level <= 1 then
-				StarterGui:SetCore('SendNotification', {
-					Title = 'มีการ Error เกิดขึ้น';
-					Text = 'ไม่พบข้อมูลตัวละครที่พึ่งวางไป';
-					Duration = 5
-				})
-				return
-			end
+	if not next_level_data then
+		--table.remove(Queues,1)
+		return
+	end
 
-			data.yen_goal = next_level_data.Cost
-			data.action_status = 'upgrade'
-			Ask_AI_Decision(data,Queues[1], "queue_upgrade")
-		end
+	if not next_level_data and data.cur_upgrade_level <= 1 then
+		StarterGui:SetCore('SendNotification', {
+			Title = 'มีการ Error เกิดขึ้น';
+			Text = 'ไม่พบข้อมูลตัวละครที่พึ่งวางไป';
+			Duration = 5
+		})
+		return
+	end
+
+	data.yen_goal = next_level_data.Cost
+	data.action_status = 'upgrade'
+	Ask_AI_Decision(data,Queues[1], "queue_upgrade")
+end
+
+local Comp_Handler = {
+	["Spread Upgrade"] = function(data)
+
+		
 
 		Connections.comps.OnUnitPlaced = Events.comps.OnUnitPlaced.Event:Connect(function(data, placed_position)
 			AddUpgradeQueue(data,placed_position)
@@ -694,6 +696,12 @@ function Upgrade_This_Unit(queue_data)
 			
 			if SameTarget >= 10 then
 				--Ditch this thing (Probably goes out of sync?)
+				local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
+				
+				if IsInvalidToPlace(Result) and not IsAPlacingUnit(Result.Instance.Parent) then
+					AddUpgradeQueue(queue_data,queue_data.position)
+				end
+				
 				
 				Toolbar.Visible = true
 				ZoomOut()
@@ -766,26 +774,28 @@ function Upgrade_This_Unit(queue_data)
 
 		--table.remove(Queues,table.find(Queues,queue_data))
 
-		local next_level_data = Upgrade_Data[queue_data.unit_name][queue_data.cur_upgrade_level+1]
-		
-		if not next_level_data then
-			table.remove(Queues,1)
-			return
-		end
 		
 		queue_data.cur_upgrade_level += 1
+		
+		Toolbar.Visible = true
+		
+		ZoomOut()
+		
+		local next_level_data = Upgrade_Data[queue_data.unit_name][queue_data.cur_upgrade_level]
+
+		if not next_level_data then
+			AddUpgradeQueue(queue_data,queue_data.position)
+			return
+		end
+
 
 		queue_data.yen_goal = next_level_data.Cost
-
-		ZoomOut()
-
-		Toolbar.Visible = true
 
 		queue_data.action_in_progress = false
 		if Retry >= 10 then
 			return true
 		end
-		table.remove(Queues,1)
+		AddUpgradeQueue(queue_data,queue_data.position)
 
 		Events.comps.OnUnitUpgraded:Fire(queue_data, Position)
 
@@ -1079,7 +1089,7 @@ local function Initialize_Available_Unit()
 		plr.CharacterAdded:Wait()
 	end
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*5)))))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 	Current_Tracking_Node = Starting_Node
 	
 	for _,v in Connections do
