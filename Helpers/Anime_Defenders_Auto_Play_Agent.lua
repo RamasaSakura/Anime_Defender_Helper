@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.0")
+warn("Auto Play Pre-Build v 1.0.4.1")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -780,7 +780,9 @@ function ZoomOut()
 end
 
 function CancelPlacement()
-	if game:GetService("UserInputService").TouchEnabled then
+	if game:GetService("UserInputService").TouchEnabled and game:GetService("Players").LocalPlayer.PlayerGui.HUD:FindFirstChild("MobileButtonHolder") then
+		
+	
 		click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
 	else
 		VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
