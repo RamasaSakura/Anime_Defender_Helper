@@ -1369,7 +1369,7 @@ local function RefreshWave()
 	
 	local cur_wave = tonumber(WaveText.Text:gsub(",",""):match("%d+"))
 
-	if not cur_wave or cur_wave < 2 then
+	if not cur_wave or cur_wave < 4 then
 		return
 	end
 
