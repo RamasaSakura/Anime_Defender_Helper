@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.0")
+warn("Auto Play Pre-Build v 1.0.5.1")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1383,8 +1383,8 @@ local function RefreshWave()
 		return a[2] < b[2]
 	end)
 
-	for i in distance do
-		if i[1] == plr then
+	for i,v in distance do
+		if v[1] == plr then
 			Player_Index = i
 
 			break
