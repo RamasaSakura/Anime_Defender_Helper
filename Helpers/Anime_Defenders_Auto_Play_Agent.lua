@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play 1.0.0.5")
+warn("Auto Play v 1.0.0.6")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -736,7 +736,7 @@ function Upgrade_This_Unit(queue_data)
 			
 			local Result = Price_Label.Text:gsub(",",""):match("%d+")
 			
-			if not Result or #Result > 0 or Retry >= 20 then
+			if not Result or #Result <= 0 or Retry >= 20 then
 				Retry += 1
 				continue
 			end
