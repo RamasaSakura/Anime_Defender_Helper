@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.7")
+warn("Auto Play Pre-Build v 1.0.4.8")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -415,6 +415,8 @@ function AddUpgradeQueue(Added_Data,placed_position)
 				new.statics[i] = v
 			end]]
 
+	data.action_status = 'upgrade'
+	data.action_in_progress = false
 	local new = deepCopy(data)
 
 	table.insert(data.placed_info,new)
@@ -436,8 +438,8 @@ function AddUpgradeQueue(Added_Data,placed_position)
 
 
 	
-	data.action_status = 'upgrade'
-	data.action_in_progress = false
+	--data.action_status = 'upgrade'
+	--data.action_in_progress = false
 	
 	if not next_level_data then
 		--table.remove(Queues,1)
@@ -475,7 +477,7 @@ local Comp_Handler = {
 			local options = {}
 
 			for i,v in Available_Units_Info do
-				options[i] = table.clone(v)
+				options[i] = deepCopy(v)
 
 				option_score[i] = {0,v}
 			end
@@ -879,7 +881,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 		local ValidFailed = 0
 		while model.Parent do
 
-			if Retry >= 5 then
+			if Retry >= 10 then
 
 				table.insert(blacklist_location, Position)
 				Toolbar.Visible = true
@@ -927,7 +929,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 		table.remove(Queues,1)
 
-		queue_data.action_in_progress = false
+		--queue_data.action_in_progress = false
 		Events.comps.OnUnitPlaced:Fire(queue_data, Position)
 
 	end)
@@ -1053,6 +1055,8 @@ local function Initialize_Available_Unit()
 	if GameInitialized then
 		return
 	end
+	
+	GameInitialized = true
 
 	if not game:IsLoaded() then
 		game.Loaded:Wait()
@@ -1061,6 +1065,8 @@ local function Initialize_Available_Unit()
 	if not plr.Character then
 		plr.CharacterAdded:Wait()
 	end
+	
+	
 	
 	repeat task.wait() until plr:GetMouse().X ~= 0 and plr:GetMouse().Y ~= 0
 
@@ -1131,7 +1137,7 @@ local function Initialize_Available_Unit()
 		Text = 'เริ่มทำการ เล่นอัตโนมัติ'
 	})
 
-	GameInitialized = true
+	
 end
 
 
@@ -1404,10 +1410,30 @@ UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
 	end)
 end)
 
-task.spawn(function()
+--[[task.spawn(function()
 	while task.wait(6) do
 		if Upgrade_Button.Visible and UnitBillboard.Enabled then
 			
 		end
 	end
-end)
+end)]]
+
+warn('----------------------')
+
+local TabLevel = 0
+local plr = game:GetService("Players").LocalPlayer
+local function PrintTable(Table)
+	for Key,Value in pairs(Table) do
+		if typeof(Value) == "table" then
+			TabLevel = TabLevel + 1
+			warn(string.rep("    ",TabLevel - 1)..Key.." : {")
+			PrintTable(Value)
+			warn(string.rep("    ",TabLevel - 1).."}")
+			TabLevel = TabLevel - 1
+		else
+			warn(string.rep("    ",TabLevel)..Key,Value)
+		end
+	end
+end
+
+PrintTable(require(game:GetService("ReplicatedStorage").PlayerInfoCache))
