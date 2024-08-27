@@ -1065,6 +1065,8 @@ local function Initialize_Available_Unit()
 	if not plr.Character then
 		plr.CharacterAdded:Wait()
 	end
+	
+	repeat task.wait() until plr:GetMouse().X ~= 0 and plr:GetMouse().Y ~= 0
 
 	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*5)))))
 	Current_Tracking_Node = Starting_Node
