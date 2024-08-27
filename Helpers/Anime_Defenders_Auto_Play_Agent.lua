@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build")
+warn("Auto Play Pre-Build v 1.0.0.7")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -657,7 +657,7 @@ function Upgrade_This_Unit(queue_data)
 
 			local Result = Price_Label.Text:gsub(",",""):match("%d+")
 
-			if not Result or #Result > 0 or Retry >= 20 then
+			if Result and (#Result > 0 or Retry >= 20) then
 				break
 			end
 
@@ -667,7 +667,7 @@ function Upgrade_This_Unit(queue_data)
 		if Retry >= 20 then
 			Toolbar.Visible = true
 			Upgrade_Button.Parent = HolderButtons
-			Upgrade_This_Unit(queue_data)
+			AddUpgradeQueue(queue_data,queue_data.position)
 
 			return
 		end
@@ -700,6 +700,7 @@ function Upgrade_This_Unit(queue_data)
 
 
 		Upgrade_Button.Parent = HolderButtons
+		task.wait(0.1)
 
 		--table.remove(Queues,table.find(Queues,queue_data))
 
@@ -1323,4 +1324,4 @@ StarterGui:SetCore("SendNotification", {
 })
 
 --TODO: Add upgrade interest function
---_G.Queues = Queues
+_G.Queues = Queues
