@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.3")
+warn("Auto Play Pre-Build v 1.0.4.4")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -829,9 +829,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 		while not States.general.last_placing_model do
 
 			if Retry >= 15 then
-
-				
-					CancelPlacement()
+				CancelPlacement()
 
 
 				table.insert(blacklist_location,Position)
@@ -913,20 +911,6 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
 				
-				local Result = workspace:Raycast(plr:GetMouse().Target.Position, Vector3.yAxis * -50,Raycast)
-				
-				if not IsInvalidToPlace(Result) then
-					ValidFailed += 1
-					
-					if ValidFailed >= 10 then
-						Toolbar.Visible = true
-						CancelPlacement()
-						ZoomOut()
-						
-						table.remove(Queues,1)
-						return
-					end
-				end
 			end
 
 			Retry += 1
