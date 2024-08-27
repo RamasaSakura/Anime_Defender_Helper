@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.1.2")
+warn("Auto Play Pre-Build v 1.0.1.3")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -1343,3 +1343,24 @@ StarterGui:SetCore("SendNotification", {
 
 --TODO: Add upgrade interest function
 _G.Queues = Queues
+
+task.spawn(function()
+	while task.wait(6) do
+		if Upgrade_Button.Visible then
+			
+			local Price_Label = Upgrade_Button:WaitForChild('TextLabel') :: TextLabel
+			if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
+				
+
+				Toolbar.Visible = true
+				ZoomOut()
+
+				Upgrade_Button.Parent = HolderButtons
+				AddUpgradeQueue(Queues[1],Queues[1].position)
+				
+				task.wait()
+				table.remove(Queues,1)
+			end
+		end
+	end
+end)
