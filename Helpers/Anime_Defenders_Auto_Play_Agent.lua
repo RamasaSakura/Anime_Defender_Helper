@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.6")
+warn("Auto Play Pre-Build v 1.0.4.7")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1374,17 +1374,17 @@ _G.Queues = Queues
 local Update_Id = 0
 
 UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
-	
-	Update_Id += 1
-	local Cached_id = Update_Id
-	
 	if not UnitBillboard.Enabled then
 		return
 	end
 	
+	Update_Id += 1
+	local Cached_id = Update_Id
+
+	
 	task.delay(6,function()
 
-		if Update_Id ~= Cached_id then
+		if Update_Id ~= Cached_id or Upgrade_Button.Parent == HolderButtons then
 			return
 		end
 
