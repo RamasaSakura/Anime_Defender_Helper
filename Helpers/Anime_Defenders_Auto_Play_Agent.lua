@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.1")
+warn("Auto Play Pre-Build v 1.0.5.2")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -140,6 +140,9 @@ local StarterGui = game:GetService("StarterGui")
 local plr = game:GetService("Players").LocalPlayer
 local GuiService = game:GetService("GuiService")
 local GameInitialized = false
+
+local Checked = false
+
 local Player_Index = 0
 
 for i,v in game:GetService("Players"):GetPlayers() do
@@ -1281,8 +1284,8 @@ ClearCommand.Parent = TextChatService
 
 function Clear_For_Next_Stage()
 
-
-	GameInitialized = true
+	Checked = false
+	GameInitialized = false
 	table.clear(Queues)
 	table.clear(Available_Units_Info)
 	table.clear(blacklist_location)
@@ -1360,8 +1363,6 @@ end)
 
 local WaveText = game:GetService("Players").LocalPlayer.PlayerGui.HUD.WaveNumberNotification.WaveNumberText :: TextLabel
 
-local Checked = false
-
 local function RefreshWave()
 	if Checked then
 		return
@@ -1391,7 +1392,7 @@ local function RefreshWave()
 		end
 	end
 	
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
 	Current_Tracking_Node = Starting_Node
 	
 	Checked = true
