@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.3.5")
+warn("Auto Play Pre-Build v 1.0.3.6")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -1059,7 +1059,7 @@ local function Initialize_Available_Unit()
 	Connections.general.yen_tracking = yen_value.Changed:Connect(Queues_Checker)
 
 	Connections.general.match_tracker = MatchResultPage:GetPropertyChangedSignal("Visible"):Connect(function()
-		if MatchResultPage.Visible then
+		if not MatchResultPage.Visible then
 			return
 		end
 
