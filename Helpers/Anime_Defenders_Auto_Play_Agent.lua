@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build 1.0.0.3")
+warn("Auto Play Pre-Build 1.0.0.4")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -644,6 +644,8 @@ function Upgrade_This_Unit(queue_data)
 		end
 
 		if SameTarget >= 10 then
+			Toolbar.Visible = true
+			ZoomOut()
 			return
 		end
 
@@ -696,7 +698,12 @@ function Upgrade_This_Unit(queue_data)
 
 		if not next_level_data then
 			table.remove(Queues,1)
+			
+			Toolbar.Visible = true
+			ZoomOut()
 			AddUpgradeQueue(queue_data,queue_data.position)
+			
+			
 			return
 		end
 
