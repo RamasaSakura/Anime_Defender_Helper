@@ -7,7 +7,7 @@ switch to third most important when no more unit to switch it will switch to Pro
 
 
 NOTES:
-AI will account current upgrade cost rather than initial placement cost (Outdated note...)
+Most configs probably won't work because I just dumb
 
 ]]
 
