@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build-1.0.0.2")
+warn("Auto Play Pre-Build 1.0.0.3")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -824,7 +824,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 		while model.Parent do
 
-			if Retry >= 10 then
+			if Retry >= 7 then
 
 				table.insert(blacklist_location, Position)
 				Toolbar.Visible = true
@@ -838,7 +838,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			end
 
 			--Toolbar.Visible = false
-			task.wait(0.25)
+			task.wait(Random:NextNumber(0.15,0.35))
 
 			local offset = {
 				x = 0 + (Retry * Random:NextNumber(-5,5));
