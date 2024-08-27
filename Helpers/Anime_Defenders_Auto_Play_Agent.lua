@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.4")
+warn("Auto Play Pre-Build v 1.0.4.6")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -184,7 +184,7 @@ local Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: 
 
 
 local Total_Nodes = #Selected_Folder:GetChildren()
-local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*5)))))
+local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
 
 local Current_Tracking_Node = Starting_Node :: BasePart
 
@@ -879,7 +879,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 		local ValidFailed = 0
 		while model.Parent do
 
-			if Retry >= 15 then
+			if Retry >= 5 then
 
 				table.insert(blacklist_location, Position)
 				Toolbar.Visible = true
@@ -893,7 +893,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			end
 
 			--Toolbar.Visible = false
-			task.wait(Random:NextNumber(0.1,0.2))
+			task.wait(Random:NextNumber(0.15,1))
 
 			local offset = {
 				x = 0 + (Retry * Random:NextNumber(-5,5));
@@ -903,7 +903,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			--print(`Distance: {(Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.X) - Position).Magnitude}`)
 
 			Camera.CFrame = Goal
-			if Retry <= 4 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 3) then
+			if Retry <= 2 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 3) then
 				--Test area to see if it placeable
 				VirtualInputManager:SendMouseMoveEvent(vector.X+offset.x,vector.Y+offset.y,game)
 				model:PivotTo(CFrame.new(Position + Vector3.new(0,size.Y/2,0)))
@@ -1064,7 +1064,7 @@ local function Initialize_Available_Unit()
 	
 	repeat task.wait() until plr:GetMouse().X ~= 0 and plr:GetMouse().Y ~= 0
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*5)))))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
 	Current_Tracking_Node = Starting_Node
 
 	for _,v in Connections do
