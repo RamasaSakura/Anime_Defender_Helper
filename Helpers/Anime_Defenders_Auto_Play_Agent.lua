@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build")
+warn("Auto Play Pre-Build v1.0.0.9")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -440,6 +440,7 @@ function AddUpgradeQueue(Added_Data,placed_position)
 
 	data.yen_goal = next_level_data.Cost
 	data.action_status = 'upgrade'
+	data.action_in_progress = false
 	Ask_AI_Decision(data,Queues[1], "queue_upgrade")
 end
 
