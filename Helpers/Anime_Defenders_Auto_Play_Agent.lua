@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play v 1.0.4")
+warn("Auto Play 1.0.0.5")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -784,6 +784,7 @@ function Upgrade_This_Unit(queue_data)
 		local next_level_data = Upgrade_Data[queue_data.unit_name][queue_data.cur_upgrade_level]
 
 		if not next_level_data then
+			table.remove(Queues,table.find(Queues,queue_data))
 			AddUpgradeQueue(queue_data,queue_data.position)
 			return
 		end
@@ -795,7 +796,9 @@ function Upgrade_This_Unit(queue_data)
 		if Retry >= 10 then
 			return true
 		end
-		AddUpgradeQueue(queue_data,queue_data.position)
+		
+		table.remove(Queues,table.find(Queues,queue_data))
+		--AddUpgradeQueue(queue_data,queue_data.position)
 
 		Events.comps.OnUnitUpgraded:Fire(queue_data, Position)
 
@@ -823,7 +826,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 	if Counter and Counter >= 5 then
 		--Drop this operation if failed too many time (Placed capped unit?)
 		
-		table.remove(Queues,1)
+		table.remove(Queues,table.find(Queues,queue_data))
 		return
 	end
 
@@ -952,7 +955,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 		Toolbar.Visible = true
 
-		table.remove(Queues,1)
+		table.remove(Queues,table.find(Queues,queue_data))
 
 		queue_data.action_in_progress = false
 		Events.comps.OnUnitPlaced:Fire(queue_data, Position)
@@ -1190,7 +1193,7 @@ function Queues_Checker(current_yen)
 	if not cur_queue_data or not cur_queue_data.yen_goal or (cur_queue_data.yen_goal > current_yen) or cur_queue_data.action_in_progress then
 
 		if cur_queue_data and not cur_queue_data.yen_goal then
-			table.remove(Queues,1) --Remove from queue
+			table.remove(Queues,table.find(Queues,cur_queue_data)) --Remove from queue
 		end
 
 		return
