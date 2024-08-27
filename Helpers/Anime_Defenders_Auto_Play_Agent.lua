@@ -7,11 +7,11 @@ switch to third most important when no more unit to switch it will switch to Pro
 
 
 NOTES:
-Most configs probably won't work because I just dumb
+AI will account current upgrade cost rather than initial placement cost (Outdated note...)
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.1.3")
+warn("Auto Play Pre-Build v 1.0.3.5")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -171,6 +171,8 @@ local UnitHolder = UnitBar.UnitHolder :: Frame
 local Upgrade_Text = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard.MainFrame.HolderButtons.UpgradeButton.TextLabel --Value as price?
 local HolderButtons = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard.MainFrame.HolderButtons
 local Upgrade_Button = HolderButtons:WaitForChild('UpgradeButton',5) :: TextButton
+
+local UnitBillboard = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard :: BillboardGui
 
 
 Toolbar.Visible = true
@@ -592,6 +594,9 @@ end
 
 function Upgrade_This_Unit(queue_data)
 
+	if not queue_data or not queue_data.position then
+		return
+	end
 
 	local Guis_Folder = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs :: Folder
 	local UnitBillboard = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard :: BillboardGui
@@ -1346,7 +1351,7 @@ _G.Queues = Queues
 
 task.spawn(function()
 	while task.wait(6) do
-		if Upgrade_Button.Visible then
+		if Upgrade_Button.Visible and UnitBillboard.Enabled then
 			
 			local Price_Label = Upgrade_Button:WaitForChild('TextLabel') :: TextLabel
 			if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
