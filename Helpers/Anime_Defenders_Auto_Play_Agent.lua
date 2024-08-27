@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v1.0.0.9")
+warn("Auto Play Pre-Build v 1.0.1.0")
 local Config = {
 	["Node Distance From Spawner"] = 10;
 	["Minimum Distance From Node"] = 4
@@ -432,16 +432,20 @@ function AddUpgradeQueue(Added_Data,placed_position)
 
 	--data.cur_upgrade_level += 1
 
+
+	
+	data.action_status = 'upgrade'
+	data.action_in_progress = false
+	
 	if not next_level_data then
-		table.remove(Queues,1)
+		--table.remove(Queues,1)
 		return
 	end
 
-
 	data.yen_goal = next_level_data.Cost
-	data.action_status = 'upgrade'
-	data.action_in_progress = false
 	Ask_AI_Decision(data,Queues[1], "queue_upgrade")
+	
+	
 end
 
 local Comp_Handler = {
@@ -668,6 +672,8 @@ function Upgrade_This_Unit(queue_data)
 		if Retry >= 20 then
 			Toolbar.Visible = true
 			Upgrade_Button.Parent = HolderButtons
+			
+			ZoomOut()
 			AddUpgradeQueue(queue_data,queue_data.position)
 
 			return
@@ -778,9 +784,11 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 	local cur_unit_button = queue_data.statics.frame :: Frame
 
 	local Goal = CFrame.new(Position+ Vector3.new(0,8,0), Position)
-	local Tween = TweenService:Create(Camera,TweenInfo.new(0.01), {CFrame = Goal})
-
-
+	local Tween = TweenService:Create(Camera,TweenInfo.new(0.1), {CFrame = Goal})
+	
+	Toolbar.Visible = true
+	Upgrade_Button.Parent = HolderButtons
+	task.wait()
 	Tween.Completed:Once(function()
 		--click_this_gui(cur_unit_button)
 		task.wait(0.15)
