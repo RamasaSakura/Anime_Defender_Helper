@@ -11,7 +11,7 @@ AI will account current upgrade cost rather than initial placement cost (Outdate
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.4.9")
+warn("Auto Play Pre-Build v 1.0.5.0")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -184,7 +184,7 @@ local Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: 
 
 
 local Total_Nodes = #Selected_Folder:GetChildren()
-local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
+local Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 
 local Current_Tracking_Node = Starting_Node :: BasePart
 
@@ -1070,7 +1070,7 @@ local function Initialize_Available_Unit()
 	
 	repeat task.wait() until plr:GetMouse().X ~= 0 and plr:GetMouse().Y ~= 0
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 	Current_Tracking_Node = Starting_Node
 
 	for _,v in Connections do
@@ -1358,6 +1358,52 @@ end)
 end)
 ]]
 
+local WaveText = game:GetService("Players").LocalPlayer.PlayerGui.HUD.WaveNumberNotification.WaveNumberText :: TextLabel
+
+local Checked = false
+
+local function RefreshWave()
+	if Checked then
+		return
+	end
+	
+	local cur_wave = tonumber(WaveText.Text:gsub(",",""):match("%d+"))
+
+	if not cur_wave or cur_wave < 2 then
+		return
+	end
+
+	local distance = {}
+
+	for _,v in game:GetService("Players"):GetPlayers() do
+		table.insert(distance, {v, v.Character:GetPivot().Position.Magnitude})
+	end
+
+	table.sort(distance, function(a,b)
+		return a[2] < b[2]
+	end)
+
+	for i in distance do
+		if i[1] == plr then
+			Player_Index = i
+
+			break
+		end
+	end
+	
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
+	Current_Tracking_Node = Starting_Node
+	
+	Checked = true
+end
+
+WaveText:GetPropertyChangedSignal("Text"):Connect(function()
+	
+	RefreshWave()
+end)
+
+RefreshWave()
+
 if not MatchResultPage.Visible then
 	Initialize_Available_Unit()
 
@@ -1411,4 +1457,3 @@ UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
 		end
 	end)
 end)
-
