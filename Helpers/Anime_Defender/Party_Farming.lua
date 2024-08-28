@@ -1,4 +1,5 @@
 local Lobby_Id = 17017769292
+local Realm_lobby = 18943393200
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local GuiService = game:GetService('GuiService')
 local RunService = game:GetService("RunService")
@@ -45,7 +46,7 @@ getgenv().Configuration = {
 };
 
 local function IsInLobbyGame()
-	return game.PlaceId == Lobby_Id
+	return game.PlaceId == Lobby_Id or game.PlaceId == Realm_lobby
 end
 
 if IsInLobbyGame() then
