@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.4")
+warn("Auto Play Pre-Build v 1.0.5.5")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1450,41 +1450,8 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 
 			task.wait()
 			table.remove(Queues,1)
+			
+			TimeSpent = 0
 		end
 	end
-end)
-
-local Update_Id = 0
-
-UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
-	if not UnitBillboard.Enabled then
-		return
-	end
-
-	Update_Id += 1
-	local Cached_id = Update_Id
-
-
-	task.delay(6,function()
-
-		local Gradient = Upgrade_Button.UIGradient :: UIGradient
-
-		if Update_Id ~= Cached_id and Color_Similarity(Gradient.Color.Keypoints[1],Color3.new(1,1,1)) >= 0.2 then
-			return
-		end
-
-		local Price_Label = Upgrade_Button:WaitForChild('TextLabel') :: TextLabel
-		if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
-
-
-			Toolbar.Visible = true
-			ZoomOut()
-
-			Upgrade_Button.Parent = HolderButtons
-			AddUpgradeQueue(Queues[1],Queues[1].position)
-
-			task.wait()
-			table.remove(Queues,1)
-		end
-	end)
 end)
