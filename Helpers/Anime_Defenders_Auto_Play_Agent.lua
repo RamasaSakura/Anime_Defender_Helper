@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.6.0")
+warn("Auto Play Pre-Build v 1.0.6.1")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1434,6 +1434,13 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 			if Queue_Time_Spent >= 40 then --Restore states if stuck in same action for too long
 				Queue_Time_Spent = 0
 				cur_queue.action_in_progress = false
+				
+				if cur_queue.action_status == 'upgrade' then
+					cur_queue.action_status = 'placement'
+					
+				else
+					table.remove(Queues, 1)
+				end
 				
 				Restore()
 			end
