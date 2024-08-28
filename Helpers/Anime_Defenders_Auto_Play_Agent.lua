@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.4")
+warn("Auto Play Pre-Build v 1.0.5.7")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -898,7 +898,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			end
 
 			--Toolbar.Visible = false
-			task.wait(0.1)
+			task.wait(0.125)
 
 			local offset = {
 				x = 0 + (Retry * Random:NextNumber(-5,5));
@@ -908,7 +908,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			--print(`Distance: {(Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.X) - Position).Magnitude}`)
 
 			Camera.CFrame = Goal
-			if Retry <= 4 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 3) then
+			if Retry <= 6 or (model:FindFirstChild("HumanoidRootPart") and (Vector3.new(model.HumanoidRootPart.Position.X,Position.Y,model.HumanoidRootPart.Position.Z) - Position).Magnitude > 3) then
 				--Test area to see if it placeable
 				VirtualInputManager:SendMouseMoveEvent(vector.X+offset.x,vector.Y+offset.y,game)
 				model:PivotTo(CFrame.new(Position + Vector3.new(0,size.Y/2,0)))
@@ -1170,6 +1170,8 @@ function Queues_Checker(current_yen)
 	if not Checked then
 		return
 	end
+	
+	task.wait(0.5)
 
 	local cur_queue_data = Queues[1]
 
