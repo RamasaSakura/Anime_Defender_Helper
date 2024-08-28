@@ -440,10 +440,10 @@ function AddUpgradeQueue(Added_Data,placed_position)
 	--data.cur_upgrade_level += 1
 
 
-	
+
 	--data.action_status = 'upgrade'
 	--data.action_in_progress = false
-	
+
 	if not next_level_data then
 		--table.remove(Queues,1)
 		return
@@ -451,8 +451,8 @@ function AddUpgradeQueue(Added_Data,placed_position)
 
 	data.yen_goal = next_level_data.Cost
 	Ask_AI_Decision(data,Queues[1], "queue_upgrade")
-	
-	
+
+
 end
 
 local Comp_Handler = {
@@ -684,7 +684,7 @@ function Upgrade_This_Unit(queue_data)
 		if Retry >= 20 then
 			Toolbar.Visible = true
 			Upgrade_Button.Parent = HolderButtons
-			
+
 			ZoomOut()
 			AddUpgradeQueue(queue_data,queue_data.position)
 
@@ -713,14 +713,14 @@ function Upgrade_This_Unit(queue_data)
 
 				Toolbar.Visible = true
 				ZoomOut()
-				
+
 				Upgrade_Button.Parent = HolderButtons
 				AddUpgradeQueue(queue_data,queue_data.position)
-				
+
 				return
 			end
 		end
-		
+
 		if Price_Label.Text == "" or string.lower(Price_Label.Text) == "max" then
 			table.remove(Queues,1)
 
@@ -742,12 +742,12 @@ function Upgrade_This_Unit(queue_data)
 
 		if not next_level_data then
 			table.remove(Queues,1)
-			
+
 			Toolbar.Visible = true
 			ZoomOut()
 			AddUpgradeQueue(queue_data,queue_data.position)
-			
-			
+
+
 			return
 		end
 
@@ -788,17 +788,17 @@ end
 
 function CancelPlacement()
 	if game:GetService("UserInputService").TouchEnabled and game:GetService("Players").LocalPlayer.PlayerGui.HUD:FindFirstChild("MobileButtonHolder") then
-	
+
 		while task.wait(0.5) do
-			
+
 			if game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.Visible then
 				click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileButtonHolder.CancelButton)
 			end
-			
-			
+
+
 		end	
-	
-		
+
+
 	else
 		VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.C,false,game)
 		VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.C,false,game)
@@ -821,7 +821,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 
 	local Goal = CFrame.new(Position+ Vector3.new(0,8,0), Position)
 	local Tween = TweenService:Create(Camera,TweenInfo.new(0.1), {CFrame = Goal})
-	
+
 	Toolbar.Visible = true
 	Upgrade_Button.Parent = HolderButtons
 	task.wait()
@@ -915,7 +915,7 @@ function Place_Unit_Here(queue_data, Position: Vector3, Counter :number?)
 			else
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
 				VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
-				
+
 			end
 
 			Retry += 1
@@ -1058,7 +1058,7 @@ local function Initialize_Available_Unit()
 	if GameInitialized then
 		return
 	end
-	
+
 	GameInitialized = true
 
 	if not game:IsLoaded() then
@@ -1068,9 +1068,9 @@ local function Initialize_Available_Unit()
 	if not plr.Character then
 		plr.CharacterAdded:Wait()
 	end
-	
-	
-	
+
+
+
 	repeat task.wait() until plr:GetMouse().X ~= 0 and plr:GetMouse().Y ~= 0
 
 	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
@@ -1133,14 +1133,14 @@ local function Initialize_Available_Unit()
 	--Connections.general.Toolbar_Visibility = Toolbar:GetPropertyChangedSignal("Visible")
 	Events.core.OnGameStarted:Fire()
 
-	
+
 	task.wait(3)
 	StarterGui:SetCore("SendNotification", {
 		Title = 'ระบบเริ่มทำงานแล้ว';
 		Text = 'เริ่มทำการ เล่นอัตโนมัติ'
 	})
 
-	
+
 end
 
 
@@ -1166,11 +1166,11 @@ function How_Much_Are_You_Interested_In_This(base_score: number, asking_about: a
 end
 
 function Queues_Checker(current_yen)
-	
+
 	if not Checked then
 		return
 	end
-	
+
 	local cur_queue_data = Queues[1]
 
 	if not cur_queue_data or not cur_queue_data.yen_goal or (cur_queue_data.yen_goal > current_yen) or cur_queue_data.action_in_progress then
@@ -1372,7 +1372,7 @@ local function RefreshWave()
 	if Checked then
 		return
 	end
-	
+
 	local cur_wave = tonumber(WaveText.Text:gsub(",",""):match("%d+"))
 
 	if not cur_wave or cur_wave < 4 then
@@ -1396,15 +1396,15 @@ local function RefreshWave()
 			break
 		end
 	end
-	
+
 	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*2)))))
 	Current_Tracking_Node = Starting_Node
-	
+
 	Checked = true
 end
 
 WaveText:GetPropertyChangedSignal("Text"):Connect(function()
-	
+
 	RefreshWave()
 end)
 
@@ -1428,6 +1428,31 @@ StarterGui:SetCore("SendNotification", {
 
 --TODO: Add upgrade interest function
 _G.Queues = Queues
+local TimeSpent = 0
+game:GetService("RunService").PostSimulation:Connect(function(dt)
+	if Upgrade_Button:IsDescendantOf(HolderButtons) then
+		TimeSpent = 0
+		return
+	end
+	
+	TimeSpent += dt
+	
+	if TimeSpent >= 6 then
+		local Price_Label = Upgrade_Button:WaitForChild('TextLabel') :: TextLabel
+		if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
+
+
+			Toolbar.Visible = true
+			ZoomOut()
+
+			Upgrade_Button.Parent = HolderButtons
+			AddUpgradeQueue(Queues[1],Queues[1].position)
+
+			task.wait()
+			table.remove(Queues,1)
+		end
+	end
+end)
 
 local Update_Id = 0
 
@@ -1435,13 +1460,13 @@ UnitBillboard:GetPropertyChangedSignal('Enabled'):Connect(function()
 	if not UnitBillboard.Enabled then
 		return
 	end
-	
+
 	Update_Id += 1
 	local Cached_id = Update_Id
 
-	
+
 	task.delay(6,function()
-		
+
 		local Gradient = Upgrade_Button.UIGradient :: UIGradient
 
 		if Update_Id ~= Cached_id and Color_Similarity(Gradient.Color.Keypoints[1],Color3.new(1,1,1)) >= 0.2 then
