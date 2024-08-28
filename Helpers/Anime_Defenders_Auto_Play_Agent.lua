@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.7")
+warn("Auto Play Pre-Build v 1.0.5.8")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1184,30 +1184,6 @@ function Queues_Checker(current_yen)
 		return
 	end
 
-	--[[if cur_queue_data then
-
-		warn('----------------------')
-		warn(cur_queue_data.yen_goal)
-
-		local TabLevel = 0
-		local plr = game:GetService("Players").LocalPlayer
-		local function PrintTable(Table)
-			for Key,Value in pairs(Table) do
-				if typeof(Value) == "table" then
-					TabLevel = TabLevel + 1
-					warn(string.rep("    ",TabLevel - 1)..Key.." : {")
-					PrintTable(Value)
-					warn(string.rep("    ",TabLevel - 1).."}")
-					TabLevel = TabLevel - 1
-				else
-					warn(string.rep("    ",TabLevel)..Key,Value)
-				end
-			end
-		end
-
-		PrintTable(Queues)
-
-	end]]
 
 	cur_queue_data.action_in_progress = true
 
@@ -1399,7 +1375,7 @@ local function RefreshWave()
 		end
 	end
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*4)))))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*6)))))
 	Current_Tracking_Node = Starting_Node
 
 	Checked = true
