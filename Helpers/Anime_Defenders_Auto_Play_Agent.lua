@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.8")
+warn("Auto Play Pre-Build v 1.0.5.9")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1407,7 +1407,42 @@ StarterGui:SetCore("SendNotification", {
 --TODO: Add upgrade interest function
 _G.Queues = Queues
 local TimeSpent = 0
+local Queue_Time_Spent = 0
+local cur_queue
+
+local function Restore()
+
+
+	Toolbar.Visible = true
+	ZoomOut()
+
+	Upgrade_Button.Parent = HolderButtons
+end
+
 game:GetService("RunService").PostSimulation:Connect(function(dt)
+	
+	if cur_queue and cur_queue ~= Queues[1] then --Reset timer when queue changed
+		Queue_Time_Spent = 0
+	end
+	
+	cur_queue = Queues[1]
+	
+	if cur_queue then
+		if cur_queue.action_in_progress then
+			Queue_Time_Spent += dt
+			
+			if Queue_Time_Spent >= 40 then --Restore states if stuck in same action for too long
+				Queue_Time_Spent = 0
+				cur_queue.action_in_progress = false
+				
+				Restore()
+			end
+			
+		else
+			Queue_Time_Spent = 0	
+		end
+	end
+
 	if Upgrade_Button:IsDescendantOf(HolderButtons) then
 		TimeSpent = 0
 		return
@@ -1419,11 +1454,7 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 		local Price_Label = Upgrade_Button:WaitForChild('TextLabel') :: TextLabel
 		if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
 
-
-			Toolbar.Visible = true
-			ZoomOut()
-
-			Upgrade_Button.Parent = HolderButtons
+			Restore()
 			AddUpgradeQueue(Queues[1],Queues[1].position)
 
 			task.wait()
