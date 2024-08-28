@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.7.0")
+warn("Auto Play Pre-Build v 1.0.7.1")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1437,6 +1437,8 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 
 				if cur_queue.action_status == 'upgrade' then
 					cur_queue.action_status = 'placement'
+					table.remove(Queues, 1)
+					Ask_AI_Decision(deepCopy(cur_queue),Queues[1], "queue_placement")
 				else
 					--table.remove(Queues, 1)
 				end
