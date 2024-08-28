@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.6.3")
+warn("Auto Play Pre-Build v 1.0.5.4 v 1.0.6.4")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1428,31 +1428,26 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 	cur_queue = Queues[1]
 	
 	if cur_queue then
-		if cur_queue.action_in_progress then
-			
-			if cur_queue.action_status == 'upgrade' then
-				if cur_queue.yen_goal > yen_value.Value then
-					return --Don't increment if goal higher than holding yen
-				end
-			end
+		if cur_queue.action_status == 'upgrade' then
+			if cur_queue.yen_goal <= yen_value.Value then
+				Queue_Time_Spent += dt
 
-			Queue_Time_Spent += dt
-			
-			if Queue_Time_Spent >= 40 then --Restore states if stuck in same action for too long
-				Queue_Time_Spent = 0
-				cur_queue.action_in_progress = false
-				
-				if cur_queue.action_status == 'upgrade' then
-					cur_queue.action_status = 'placement'
-				else
-					table.remove(Queues, 1)
+				if Queue_Time_Spent >= 40 then --Restore states if stuck in same action for too long
+					Queue_Time_Spent = 0
+					cur_queue.action_in_progress = false
+
+					if cur_queue.action_status == 'upgrade' then
+						cur_queue.action_status = 'placement'
+					else
+						table.remove(Queues, 1)
+					end
+
+					Restore()
 				end
 				
-				Restore()
+			else
+				Queue_Time_Spent = 0
 			end
-			
-		else
-			Queue_Time_Spent = 0	
 		end
 	end
 
