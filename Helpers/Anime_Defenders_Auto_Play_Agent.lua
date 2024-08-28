@@ -11,9 +11,9 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.1.0.2")
+warn("Auto Play Pre-Build v 1.1.0.3")
 local Config = {
-	["Node Distance From Spawner"] = 4;
+	["Node Distance From Spawner"] = 4; --This always be 1 on Hall of mirror
 	["Minimum Distance From Node"] = 4
 };
 
@@ -177,6 +177,7 @@ local Upgrade_Button = HolderButtons:WaitForChild('UpgradeButton',5) :: TextButt
 
 local UnitBillboard = game:GetService("Players").LocalPlayer.PlayerGui.UI.GUIs.LocalUnitBillboard :: BillboardGui
 
+local HallOfMirrorId = 17018663967
 
 Toolbar.Visible = true
 
@@ -260,6 +261,7 @@ local Info_Ranking = {
 	Slot = {}
 }
 
+
 local ProblemsSolver = {
 	['queue_placement'] = function(option_1,option_2)
 		local default_score = 10
@@ -330,6 +332,12 @@ local Queue_Actions = {
 		return true
 	end,
 }
+
+
+
+local function IsHallOfMirror()
+	return game.PlaceId == HallOfMirrorId
+end
 
 function Adjust_Rank()
 	task.wait(1)
@@ -649,8 +657,8 @@ function Upgrade_This_Unit(queue_data)
 			screenPoint = Vector2.new(vector.X, vector.Y)
 			
 			local offset = {
-				x = 0 + (SameTarget * Random:NextNumber(-5,5));
-				y = 0 + (SameTarget * Random:NextNumber(-5,5))
+				x = 0 + (SameTarget * Random:NextNumber(-2,2));
+				y = 0 + (SameTarget * Random:NextNumber(-2,2))
 			}
 
 
@@ -1077,9 +1085,10 @@ local function Initialize_Available_Unit()
 
 
 	repeat task.wait() until plr:GetMouse().X ~= 0 and plr:GetMouse().Y ~= 0
-
+	
 	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*3)))))
 	Current_Tracking_Node = Starting_Node
+
 
 	for _,v in Connections do
 		for _,v2 in v do
@@ -1349,49 +1358,87 @@ end)
 end)
 ]]
 
-local WaveText = game:GetService("Players").LocalPlayer.PlayerGui.HUD.WaveNumberNotification.WaveNumberText :: TextLabel
+if IsHallOfMirror() then
+	task.spawn(function()
+		repeat task.wait(1) until workspace.DistributedGameTime >= 60
+		
+		Config["Node Distance From Spawner"] = 1
+		
+		local distance = {}
 
-local function RefreshWave()
-	if Checked then
-		return
+		for _,v in game:GetService("Players"):GetPlayers() do
+			table.insert(distance, {v, v.Character:GetPivot().Position.Magnitude})
+		end
+
+		table.sort(distance, function(a,b)
+			return a[2] < b[2]
+		end)
+
+		for i,v in distance do
+			if v[1] == plr then
+				Player_Index = i
+
+				break
+			end
+		end
+		
+
+		Selected_Path = Player_Index 
+		Selected_Folder = Paths_Folder:FindFirstChild(tostring(Selected_Path)) :: Folder
+
+
+		Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)))))
+		Current_Tracking_Node = Starting_Node
+	end)
+	
+	
+else
+	local WaveText = game:GetService("Players").LocalPlayer.PlayerGui.HUD.WaveNumberNotification.WaveNumberText :: TextLabel
+
+	local function RefreshWave()
+		if Checked then
+			return
+		end
+
+		local cur_wave = tonumber(WaveText.Text:gsub(",",""):match("%d+"))
+
+		if not cur_wave or cur_wave < 4 then
+			return
+		end
+
+		local distance = {}
+
+		for _,v in game:GetService("Players"):GetPlayers() do
+			table.insert(distance, {v, v.Character:GetPivot().Position.Magnitude})
+		end
+
+		table.sort(distance, function(a,b)
+			return a[2] < b[2]
+		end)
+
+		for i,v in distance do
+			if v[1] == plr then
+				Player_Index = i
+
+				break
+			end
+		end
+
+		Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*4)))))
+		Current_Tracking_Node = Starting_Node
+
+		Checked = true
 	end
 
-	local cur_wave = tonumber(WaveText.Text:gsub(",",""):match("%d+"))
+	WaveText:GetPropertyChangedSignal("Text"):Connect(function()
 
-	if not cur_wave or cur_wave < 4 then
-		return
-	end
-
-	local distance = {}
-
-	for _,v in game:GetService("Players"):GetPlayers() do
-		table.insert(distance, {v, v.Character:GetPivot().Position.Magnitude})
-	end
-
-	table.sort(distance, function(a,b)
-		return a[2] < b[2]
+		RefreshWave()
 	end)
 
-	for i,v in distance do
-		if v[1] == plr then
-			Player_Index = i
+	RefreshWave()
 
-			break
-		end
-	end
-
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*4)))))
-	Current_Tracking_Node = Starting_Node
-
-	Checked = true
 end
 
-WaveText:GetPropertyChangedSignal("Text"):Connect(function()
-
-	RefreshWave()
-end)
-
-RefreshWave()
 
 if not MatchResultPage.Visible then
 	Initialize_Available_Unit()
