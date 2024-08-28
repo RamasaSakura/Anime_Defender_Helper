@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.6.2")
+warn("Auto Play Pre-Build v 1.0.6.3")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1431,7 +1431,7 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 		if cur_queue.action_in_progress then
 			
 			if cur_queue.action_status == 'upgrade' then
-				if cur_queue.yen_goal < yen_value.Value then
+				if cur_queue.yen_goal > yen_value.Value then
 					return --Don't increment if goal higher than holding yen
 				end
 			end
