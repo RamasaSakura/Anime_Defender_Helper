@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.1.0.3")
+warn("Auto Play Pre-Build v 1.0.5.4")
 local Config = {
 	["Node Distance From Spawner"] = 4; --This always be 1 on Hall of mirror
 	["Minimum Distance From Node"] = 4
@@ -1389,7 +1389,7 @@ local function RefreshWave()
 		end
 	end
 
-	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*4)))))
+	Starting_Node = Selected_Folder:FindFirstChild(tostring(Total_Nodes - math.round(((Config["Node Distance From Spawner"] or 0)+(Player_Index*1.5)))))
 	Current_Tracking_Node = Starting_Node
 
 	Checked = true
