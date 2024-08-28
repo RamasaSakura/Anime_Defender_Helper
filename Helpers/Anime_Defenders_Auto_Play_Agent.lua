@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.5.9")
+warn("Auto Play Pre-Build v 1.0.6.0")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1455,7 +1455,12 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 		if Price_Label.Text == "" or Price_Label.Text:lower() == 'max' then
 
 			Restore()
-			AddUpgradeQueue(Queues[1],Queues[1].position)
+			
+			if Price_Label.Text:lower() ~= 'max' then
+				AddUpgradeQueue(Queues[1],Queues[1].position)
+			end
+			
+			
 
 			task.wait()
 			table.remove(Queues,1)
