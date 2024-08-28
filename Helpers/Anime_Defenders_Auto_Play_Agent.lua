@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.0.6.8")
+warn("Auto Play Pre-Build v 1.0.7.0")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -1480,10 +1480,11 @@ game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,false)
 
 
 
-game:GetService("ContextActionService"):BindAction("LEAVE", function()
+--[[game:GetService("ContextActionService"):BindAction("LEAVE", function()
 	
 	game:GetService("Players").LocalPlayer.PlayerGui.TopBar.HolderFrame.Left.dropDown.DropdownFrame["Leave Game"].Parent = game:GetService("Players").LocalPlayer.PlayerGui.PAGES
 	
 	click_this_gui(game:GetService("Players").LocalPlayer.PlayerGui.TopBar.HolderFrame.Left.dropDown.DropdownFrame["Leave Game"])
 	
 end,true,Enum.KeyCode.L)
+]]
