@@ -11,7 +11,7 @@ Config may not work because I just dumb.
 
 ]]
 
-warn("Auto Play Pre-Build v 1.1.0.0")
+warn("Auto Play Pre-Build v 1.1.0.1")
 local Config = {
 	["Node Distance From Spawner"] = 4;
 	["Minimum Distance From Node"] = 4
@@ -647,10 +647,15 @@ function Upgrade_This_Unit(queue_data)
 
 			vector= Camera:WorldToViewportPoint(Position)
 			screenPoint = Vector2.new(vector.X, vector.Y)
+			
+			local offset = {
+				x = 0 + (SameTarget * Random:NextNumber(-5,5));
+				y = 0 + (SameTarget * Random:NextNumber(-5,5))
+			}
 
 
-			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,true,game,0)
-			VirtualInputManager:SendMouseButtonEvent(vector.X,vector.Y,0,false,game,0)
+			VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,true,game,0)
+			VirtualInputManager:SendMouseButtonEvent(vector.X+offset.x,vector.Y+offset.y,0,false,game,0)
 
 			--[[local Result = workspace:Raycast(Position, Vector3.yAxis * -20,Raycast)
 			
