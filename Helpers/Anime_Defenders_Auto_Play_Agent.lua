@@ -1482,3 +1482,5 @@ game:GetService("RunService").PostSimulation:Connect(function(dt)
 		end
 	end
 end)
+
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,false)
