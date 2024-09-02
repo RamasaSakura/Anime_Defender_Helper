@@ -1122,8 +1122,12 @@ local function Initialize_Available_Unit()
 			continue
 		end
 
-		if v.Name == "LockedFrame" then
-			v:GetPropertyChangedSignal("Name"):Once(function()
+		if v.Name ~= "UnitGridPrefab" then
+			v:GetPropertyChangedSignal("Name"):Connect(function()
+				if v.Name ~= "UnitGridPrefab" then
+					return
+				end		
+					
 				Add_Information(v)
 			end)
 		else
